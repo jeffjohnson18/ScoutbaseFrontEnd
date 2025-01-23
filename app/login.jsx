@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router'; // Use this hook for navigation
+import { jwtDecode } from 'jwt-decode'; // Import jwtDecode
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [jwt, setJwt] = useState(null);
+  const router = useRouter(); // Initialize the router
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -26,17 +28,36 @@ const LoginScreen = () => {
       }
 
       const data = await response.json();
-      setJwt(data.jwt);
-      Alert.alert('Success', 'Login successful!');
+      const token = data.jwt;
+
+      if (!token) {
+        throw new Error('No token found in response');
+      }
+
+      const decodedToken = jwtDecode(token); // Decode the JWT to extract user info
+      const userId = decodedToken.id;
+
+      // Check if the user has a role assigned
+      const roleResponse = await fetch(`http://10.0.2.2:8000/scoutbase/fetchrole?user_id=${userId}`);
+      const roleData = await roleResponse.json();
+
+      // If no role is assigned, navigate to the RoleAssignment screen
+      if (!roleData.role) {
+        router.push('/roleassignment'); // No need to include userId
+      } else {
+        Alert.alert('Success', 'Login successful!');
+        // Navigate to next screen, e.g., home or dashboard
+        // router.push('/home');
+      }
+      
     } catch (error) {
-      Alert.alert('Error', 'Login failed. Please try again.');
-      console.error(error);
+      Alert.alert('Error', `Login failed. Please try again. ${error.message}`);
+      console.error('Login Error:', error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -53,7 +74,6 @@ const LoginScreen = () => {
         secureTextEntry
       />
       <Button title="Login" onPress={handleLogin} />
-      {jwt && <Text style={styles.jwt}>JWT: {jwt}</Text>}
     </View>
   );
 };
@@ -66,10 +86,6 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#f5f5f5',
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-  },
   input: {
     width: '100%',
     height: 40,
@@ -79,11 +95,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     backgroundColor: '#fff',
-  },
-  jwt: {
-    marginTop: 16,
-    color: 'green',
-    textAlign: 'center',
   },
 });
 

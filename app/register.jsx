@@ -1,45 +1,49 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import jwtDecode from 'jwt-decode'; // Import jwt-decode
+import { useNavigation } from '@react-navigation/native'; // For navigation
 
-const RegistrationScreen = () => {
-  const [name, setName] = useState('');
+const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigation = useNavigation();
 
-  const handleRegister = async () => {
-    if (!name || !email || !password) {
+  const handleLogin = async () => {
+    if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     try {
-      const response = await fetch('http://10.0.2.2:8000/scoutbase/register', {
+      const response = await fetch('http://10.0.2.2:8000/scoutbase/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Registration failed');
-      }
+      if (response.ok) {
+        const data = await response.json();
+        const token = data.token; 
 
-      Alert.alert('Success', 'Registration successful!');
+        // Decode the token to get the user_id
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.user_id; // Adjust based on your token structure
+
+        // Navigate to the Role Assignment screen with user_id
+        navigation.navigate('RoleAssignment', { user_id: userId });
+      } else {
+        Alert.alert('Error', 'Invalid email or password');
+      }
     } catch (error) {
-      Alert.alert('Error', 'Registration failed. Please try again.');
+      Alert.alert('Error', 'Login failed. Please try again.');
       console.error(error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -55,7 +59,7 @@ const RegistrationScreen = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Register" onPress={handleRegister} />
+      <Button title="Login" onPress={handleLogin} />
     </View>
   );
 };
@@ -80,4 +84,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegistrationScreen;
+export default LoginScreen;
