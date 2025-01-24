@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router'; // Use this hook for navigation
+import { useRouter } from 'expo-router';
 
 const RoleAssignmentScreen = ({ route }) => {
 
