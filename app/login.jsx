@@ -45,10 +45,20 @@ const LoginScreen = () => {
       // If no role is assigned, navigate to the RoleAssignment screen
       if (!roleData.role) {
         router.push('/roleassignment');
-      } else {
+      } 
+      else if (roleData.role === 'Scout') {
         Alert.alert('Success', 'Login successful!');
-
+        router.push('/createscout');
+      } else if (roleData.role === 'Athlete') {
+        Alert.alert('Success', 'Login successful!');
+        router.push('/createathlete');
+      } else if (roleData.role === 'Coach') {
+        Alert.alert('Success', 'Login successful!');
+        router.push('/createcoach');
+      } else {
+        throw new Error('Invalid role found');
       }
+      
       
     } catch (error) {
       Alert.alert('Error', `Login failed. Please try again. ${error.message}`);

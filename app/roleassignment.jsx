@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
 
 const RoleAssignmentScreen = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const fetchTokenAndDecode = async () => {
     try {
@@ -20,7 +22,7 @@ const RoleAssignmentScreen = () => {
         throw new Error('Failed to retrieve token');
       }
 
-      const token = await response.text(); 
+      const token = await response.text();
       const decodedToken = jwtDecode(token);
 
       if (decodedToken?.id) {
@@ -64,6 +66,13 @@ const RoleAssignmentScreen = () => {
 
       if (response.ok) {
         Alert.alert('Success', `Role "${selectedRole}" assigned successfully!`);
+        if (selectedRole === 'Athlete') {
+          router.push('/createathlete'); 
+        } else if (selectedRole === 'Coach') {
+          router.push('/createcoach');
+        } else if (selectedRole === 'Scout') {
+          router.push('/createscout');
+        }
       } else {
         const errorData = await response.json();
         Alert.alert('Error', errorData?.message || 'Failed to assign role.');
