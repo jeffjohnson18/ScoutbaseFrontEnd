@@ -1,49 +1,52 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import jwtDecode from 'jwt-decode'; // Import jwt-decode
-import { useNavigation } from '@react-navigation/native'; // For navigation
+import { useRouter } from 'expo-router'; // Import the useRouter hook
 
-const LoginScreen = () => {
+const RegistrationScreen = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigation = useNavigation();
+  const router = useRouter(); // Initialize the router
 
-  const handleLogin = async () => {
-    if (!email || !password) {
+  const handleRegister = async () => {
+    if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     try {
-      const response = await fetch('http://10.0.2.2:8000/scoutbase/login', {
+      const response = await fetch('http://10.0.2.2:8000/scoutbase/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const token = data.token; 
-
-        // Decode the token to get the user_id
-        const decodedToken = jwtDecode(token);
-        const userId = decodedToken.user_id; // Adjust based on your token structure
-
-        // Navigate to the Role Assignment screen with user_id
-        navigation.navigate('RoleAssignment', { user_id: userId });
-      } else {
-        Alert.alert('Error', 'Invalid email or password');
+      if (!response.ok) {
+        throw new Error('Registration failed');
       }
+
+      Alert.alert('Success', 'Registration successful!', [
+        {
+          text: 'OK',
+          onPress: () => router.push('/login'), // Navigate to the login page
+        },
+      ]);
     } catch (error) {
-      Alert.alert('Error', 'Login failed. Please try again.');
+      Alert.alert('Error', 'Registration failed. Please try again.');
       console.error(error);
     }
   };
 
   return (
     <View style={styles.container}>
+      <TextInput
+        style={styles.input}
+        placeholder="Name"
+        value={name}
+        onChangeText={setName}
+      />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -59,7 +62,7 @@ const LoginScreen = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Register" onPress={handleRegister} />
     </View>
   );
 };
@@ -84,4 +87,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default RegistrationScreen;
