@@ -1,10 +1,16 @@
 import React from 'react';
 import { Text, View, Dimensions } from 'react-native';
-import { Link } from 'expo-router';  // Use Link for navigation
+import { Link } from 'expo-router';
+import { useFonts } from 'expo-font';
 
 const { width } = Dimensions.get('window');
 
 export default function Home() {
+
+  const [fontsLoaded] = useFonts({
+    'Factoria': require('../assets/fonts/FactoriaTest-BoldItalic-BF65c2f4a92f9ad.otf'),
+  });
+
   return (
     <View
       style={{

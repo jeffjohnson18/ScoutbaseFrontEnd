@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router'; // Use this hook for navigation
-import { jwtDecode } from 'jwt-decode'; // Import jwtDecode
+import { useRouter } from 'expo-router'; 
+import { jwtDecode } from 'jwt-decode';
 
 const LoginScreen = () => {
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter(); // Initialize the router
+  const router = useRouter(); 
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -34,7 +35,7 @@ const LoginScreen = () => {
         throw new Error('No token found in response');
       }
 
-      const decodedToken = jwtDecode(token); // Decode the JWT to extract user info
+      const decodedToken = jwtDecode(token); 
       const userId = decodedToken.id;
 
       // Check if the user has a role assigned
@@ -43,11 +44,10 @@ const LoginScreen = () => {
 
       // If no role is assigned, navigate to the RoleAssignment screen
       if (!roleData.role) {
-        router.push('/roleassignment'); // No need to include userId
+        router.push('/roleassignment');
       } else {
         Alert.alert('Success', 'Login successful!');
-        // Navigate to next screen, e.g., home or dashboard
-        // router.push('/home');
+
       }
       
     } catch (error) {
