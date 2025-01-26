@@ -9,6 +9,7 @@ const CreateCoachProfileScreen = () => {
   const [position, setPosition] = useState('');
   const [bio, setBio] = useState('');
   const [profilePicture, setProfilePicture] = useState(null); 
+  const router = useRouter();
 
   useEffect(() => {
     fetchTokenAndDecode();
@@ -69,6 +70,7 @@ const CreateCoachProfileScreen = () => {
       }
 
       Alert.alert('Success', 'Coach profile created successfully!');
+      router.push('/home');
     } catch (error) {
       Alert.alert('Error', error.message || 'Failed to create profile.');
       console.error(error);

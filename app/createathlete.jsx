@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'expo-router';
+
 
 const CreateAthleteProfileScreen = () => {
   const [userId, setUserId] = useState(null);
   const [highSchoolName, setHighSchoolName] = useState('');
   const [positions, setPositions] = useState('');
   const [youtubeVideoLink, setYoutubeVideoLink] = useState('');
-  const [profilePicture, setProfilePicture] = useState(null); // Handle image uploads separately
+  const [profilePicture, setProfilePicture] = useState(null);
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [bio, setBio] = useState('');
   const [state, setState] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     fetchTokenAndDecode();
@@ -75,6 +78,7 @@ const CreateAthleteProfileScreen = () => {
       }
 
       Alert.alert('Success', 'Athlete profile created successfully!');
+      router.push('/home');
     } catch (error) {
       Alert.alert('Error', error.message || 'Failed to create profile.');
       console.error(error);

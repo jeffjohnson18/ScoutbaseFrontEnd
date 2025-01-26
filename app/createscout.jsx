@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Button, Alert, StyleSheet } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'expo-router';
 
 const CreateScoutProfileScreen = () => {
   const [userId, setUserId] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchTokenAndDecode();
@@ -59,6 +61,7 @@ const CreateScoutProfileScreen = () => {
       }
 
       Alert.alert('Success', 'Scout profile created successfully!');
+      router.push('/home');
     } catch (error) {
       Alert.alert('Error', error.message || 'Failed to create profile.');
       console.error(error);
