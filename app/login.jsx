@@ -14,7 +14,7 @@ const LoginScreen = () => {
       Alert.alert('Error', 'Please enter both email and password');
       return;
     }
-
+  
     try {
       const response = await fetch('http://10.0.2.2:8000/scoutbase/login', {
         method: 'POST',
@@ -23,48 +23,69 @@ const LoginScreen = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to login');
       }
-
+  
       const data = await response.json();
       const token = data.jwt;
-
+  
       if (!token) {
         throw new Error('No token found in response');
       }
-
+  
       const decodedToken = jwtDecode(token); 
       const userId = decodedToken.id;
-
-      // Check if the user has a role assigned
+  
+      // Step 1: Check user's role
       const roleResponse = await fetch(`http://10.0.2.2:8000/scoutbase/fetchrole?user_id=${userId}`);
       const roleData = await roleResponse.json();
-
-      // If no role is assigned, navigate to the RoleAssignment screen
+  
       if (!roleData.role) {
         router.push('/roleassignment');
-      } 
-      else if (roleData.role === 'Scout') {
-        Alert.alert('Success', 'Login successful!');
-        router.push('/createscout');
-      } else if (roleData.role === 'Athlete') {
-        Alert.alert('Success', 'Login successful!');
-        router.push('/createathlete');
-      } else if (roleData.role === 'Coach') {
-        Alert.alert('Success', 'Login successful!');
-        router.push('/createcoach');
       } else {
-        throw new Error('Invalid role found');
+        // Step 2: Fetch the user's profile based on their role
+        let profileResponse;
+        let profileData;
+  
+        if (roleData.role === 'Athlete') {
+          profileResponse = await fetch(`http://10.0.2.2:8000/scoutbase/searchforathlete?user_id=${userId}`);
+        } else if (roleData.role === 'Coach') {
+          profileResponse = await fetch(`http://10.0.2.2:8000/scoutbase/searchforcoach?user_id=${userId}`);
+        } else if (roleData.role === 'Scout') {
+          profileResponse = await fetch(`http://10.0.2.2:8000/scoutbase/searchforscout?user_id=${userId}`);
+        }
+  
+        if (!profileResponse.ok) {
+          throw new Error('Failed to fetch profile data');
+        }
+  
+        profileData = await profileResponse.json();
+  
+        // Step 3: Check if profile attributes are null
+        const isProfileComplete = Object.values(profileData).some(value => value !== null && value !== '');
+        
+        if (!isProfileComplete) {
+          if (roleData.role === 'Athlete') {
+            router.push('/createathlete');
+          } else if (roleData.role === 'Coach') {
+            router.push('/createcoach');
+          } else if (roleData.role === 'Scout') {
+            router.push('/createscout');
+          }
+        } else {
+          // Profile is complete, navigate to home page
+          Alert.alert('Success', 'Login successful!');
+          router.push('/home');
+        }
       }
-      
-      
     } catch (error) {
       Alert.alert('Error', `Login failed. Please try again. ${error.message}`);
       console.error('Login Error:', error);
     }
   };
+  
 
   return (
     <View style={styles.container}>
