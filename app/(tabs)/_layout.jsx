@@ -6,7 +6,7 @@ export default function Layout() {
     <Tabs
       screenOptions={({ route }) => ({
         tabBarStyle: [
-          route.name === 'home' || route.name === 'search'
+          route.name === 'home' || route.name === 'searchcoach' || route.name === 'searchathlete'
             ? {
                 backgroundColor: '#ffffff',
                 borderTopWidth: 1,
@@ -14,7 +14,7 @@ export default function Layout() {
                 height: 60,
                 paddingBottom: 5,
               }
-            : { display: 'none' }, // Hide the navbar for other routes
+            : { display: 'none' },
         ],
         tabBarActiveTintColor: '#1e90ff',
         tabBarInactiveTintColor: '#666',
@@ -31,20 +31,20 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="searchcoach"
         options={{
-          title: 'Search',
+          title: 'Search Coach',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="search" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="searchathlete"
         options={{
-          title: 'Profile',
+          title: 'Search Athlete',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="person" size={size} color={color} />
+            <MaterialIcons name="person-search" size={size} color={color} />
           ),
         }}
       />

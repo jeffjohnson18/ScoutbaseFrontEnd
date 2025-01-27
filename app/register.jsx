@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router'; // Import the useRouter hook
+import { useRouter } from 'expo-router'; 
 
 const RegistrationScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter(); // Initialize the router
+  const router = useRouter(); 
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
