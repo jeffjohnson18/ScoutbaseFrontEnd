@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react'; 
+import { View, Text, Image, ActivityIndicator, Alert, StyleSheet, Button } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'expo-router';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const [userId, setUserId] = useState(null);
   const [role, setRole] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   // Fetch JWT token and decode user ID
   const fetchTokenAndDecode = async () => {
@@ -82,6 +84,26 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8000/scoutbase/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to log out');
+      }
+
+      Alert.alert('Success', 'You have been logged out.');
+      router.replace('/');
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Logout failed.');
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -135,6 +157,7 @@ const ProfileScreen = () => {
           <Text style={styles.infoText}>State: {profileData.state}</Text>
         </>
       )}
+      <Button title="Logout" onPress={handleLogout} color="#d9534f" />
     </View>
   );
 };
@@ -144,6 +167,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
