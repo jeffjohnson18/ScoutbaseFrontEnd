@@ -35,7 +35,7 @@ export default function Layout() {
         options={{
           title: 'Search Coach',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="search" size={size} color={color} />
+            <MaterialIcons name="person-search" size={size} color={color} />
           ),
         }}
       />
