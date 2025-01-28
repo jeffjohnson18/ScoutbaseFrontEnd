@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'react-native';
 
 
 const CreateAthleteProfileScreen = () => {
@@ -46,31 +48,60 @@ const CreateAthleteProfileScreen = () => {
     }
   };
 
+  // Image picker function
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission required', 'You need to grant permission to select an image.');
+      return;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!pickerResult.canceled) {
+      setProfilePicture(pickerResult.uri); // Store the image URI
+    }
+  };
+
   const handleCreateProfile = async () => {
     if (!userId || !highSchoolName || !positions || !height || !weight || !bio || !state) {
       Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
 
-    const profileData = {
-      user_id: userId,
-      high_school_name: highSchoolName,
-      positions,
-      youtube_video_link: youtubeVideoLink || null,
-      profile_picture: profilePicture || null,
-      height: parseFloat(height),
-      weight: parseFloat(weight),
-      bio,
-      state,
-    };
+    const profileData = new FormData();
+    profileData.append('user_id', userId);
+    profileData.append('high_school_name', highSchoolName);
+    profileData.append('positions', positions);
+    profileData.append('youtube_video_link', youtubeVideoLink || '');
+    profileData.append('height', parseFloat(height));
+    profileData.append('weight', parseFloat(weight));
+    profileData.append('bio', bio);
+    profileData.append('state', state);
+
+    if (profilePicture) {
+      const uri = profilePicture;
+      const localUri = uri;
+      const filename = localUri.split('/').pop();
+      const type = `image/${filename.split('.').pop()}`;
+
+      profileData.append('profile_picture', {
+        uri: localUri,
+        name: filename,
+        type,
+      });
+    }
 
     try {
       const response = await fetch('http://10.0.2.2:8000/scoutbase/athlete/createprofile', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(profileData),
+        body: profileData,
       });
 
       if (!response.ok) {
@@ -132,6 +163,14 @@ const CreateAthleteProfileScreen = () => {
         value={state}
         onChangeText={setState}
       />
+      {/* Display selected profile picture */}
+      {profilePicture && (
+        <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+      )}
+
+
+      <Button title="Select Profile Picture" onPress={pickImage} />
+      {profilePicture && <Text>Image Selected: {profilePicture.split('/').pop()}</Text>}
       <Button title="Create Profile" onPress={handleCreateProfile} />
     </View>
   );

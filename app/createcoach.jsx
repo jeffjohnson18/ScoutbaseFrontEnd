@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, TextInput, Button, Alert, StyleSheet, Image } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 
 const CreateCoachProfileScreen = () => {
   const [userId, setUserId] = useState(null);
@@ -42,28 +43,57 @@ const CreateCoachProfileScreen = () => {
     }
   };
 
+  // Image picker function
+  const handleImagePicker = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission required', 'You need to grant permission to select an image.');
+      return;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!pickerResult.canceled) {
+      setProfilePicture(pickerResult.uri); // Store the image URI
+    }
+  };
+
   const handleCreateProfile = async () => {
     if (!userId || !teamNeeds || !schoolName || !position || !bio) {
       Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
 
-    const profileData = {
-      user_id: userId,
-      team_needs: teamNeeds,
-      school_name: schoolName,
-      position,
-      bio,
-      profile_picture: profilePicture || null,
-    };
+    const profileData = new FormData();
+    profileData.append('user_id', userId);
+    profileData.append('team_needs', teamNeeds);
+    profileData.append('school_name', schoolName);
+    profileData.append('position', position);
+    profileData.append('bio', bio);
+
+    if (profilePicture) {
+      const uri = profilePicture;
+      const localUri = uri;
+      const filename = localUri.split('/').pop();
+      const type = `image/${filename.split('.').pop()}`;
+
+      profileData.append('profile_picture', {
+        uri: localUri,
+        name: filename,
+        type,
+      });
+    }
 
     try {
       const response = await fetch('http://10.0.2.2:8000/scoutbase/coach/createprofile', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(profileData),
+        body: profileData,
       });
 
       if (!response.ok) {
@@ -105,6 +135,15 @@ const CreateCoachProfileScreen = () => {
         onChangeText={setBio}
         multiline
       />
+      
+      {/* Display selected profile picture */}
+      {profilePicture && (
+        <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+      )}
+
+      <Button title="Choose Profile Picture" onPress={handleImagePicker} />
+      {profilePicture && <Text>Image Selected: {profilePicture.split('/').pop()}</Text>}
+      
       <Button title="Create Profile" onPress={handleCreateProfile} />
     </View>
   );
@@ -126,6 +165,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     backgroundColor: '#fff',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 10,
   },
 });
 

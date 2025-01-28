@@ -46,14 +46,19 @@ const SearchAthleteScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.resultCard}>
-      <Text style={styles.resultText}>High School: {item.high_school_name}</Text>
-      <Text style={styles.resultText}>Positions: {item.positions}</Text>
-      <Text style={styles.resultText}>Height: {item.height}</Text>
-      <Text style={styles.resultText}>Weight: {item.weight}</Text>
-      <Text style={styles.resultText}>Bio: {item.bio}</Text>
-      <Text style={styles.resultText}>State: {item.state}</Text>
+      <View style={styles.profileContainer}>
+        {/* Check if there is a profile picture URL or use a default emoji */}
+        <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
+        <Text style={styles.resultText}>High School: {item.high_school_name}</Text>
+        <Text style={styles.resultText}>Positions: {item.positions}</Text>
+        <Text style={styles.resultText}>Height: {item.height}</Text>
+        <Text style={styles.resultText}>Weight: {item.weight}</Text>
+        <Text style={styles.resultText}>Bio: {item.bio}</Text>
+        <Text style={styles.resultText}>State: {item.state}</Text>
+      </View>
     </View>
   );
+  
 
   return (
     <View style={styles.container}>
@@ -111,6 +116,14 @@ const SearchAthleteScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  profileContainer: {
+    flexDirection: 'row',  
+    alignItems: 'center',  
+  },
+  profilePicture: {
+    fontSize: 40,          
+    marginRight: 12,       
+  },
   container: {
     flex: 1,
     padding: 16,

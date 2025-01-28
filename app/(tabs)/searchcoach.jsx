@@ -42,12 +42,17 @@ const SearchCoachScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.resultCard}>
-      <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
-      <Text style={styles.resultText}>School Name: {item.school_name}</Text>
-      <Text style={styles.resultText}>Position: {item.position}</Text>
-      <Text style={styles.resultText}>Bio: {item.bio}</Text>
+      <View style={styles.profileContainer}>
+        {/* Check if there is a profile picture URL or use a default emoji */}
+        <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
+        <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
+        <Text style={styles.resultText}>School Name: {item.school_name}</Text>
+        <Text style={styles.resultText}>Position: {item.position}</Text>
+        <Text style={styles.resultText}>Bio: {item.bio}</Text>
+      </View>
     </View>
   );
+  
 
   return (
     <View style={styles.container}>
@@ -91,6 +96,14 @@ const SearchCoachScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  profileContainer: {
+    flexDirection: 'row',  
+    alignItems: 'center',  
+  },
+  profilePicture: {
+    fontSize: 40,          
+    marginRight: 12,       
+  },
   container: {
     flex: 1,
     padding: 16,
