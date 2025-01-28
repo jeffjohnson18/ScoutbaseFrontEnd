@@ -1,29 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image } from 'react-native';
 
-const SearchAthleteScreen = () => {
-  const [highSchoolName, setHighSchoolName] = useState('');
-  const [positions, setPositions] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
+const SearchCoachScreen = () => {
+  const [teamNeeds, setTeamNeeds] = useState('');
+  const [schoolName, setSchoolName] = useState('');
+  const [position, setPosition] = useState('');
   const [bio, setBio] = useState('');
-  const [state, setState] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      // Construct the query string based on provided input
       const queryParams = new URLSearchParams();
-      if (highSchoolName) queryParams.append('high_school_name', highSchoolName);
-      if (positions) queryParams.append('positions', positions);
-      if (height) queryParams.append('height', height);
-      if (weight) queryParams.append('weight', weight);
+      if (teamNeeds) queryParams.append('team_needs', teamNeeds);
+      if (schoolName) queryParams.append('school_name', schoolName);
+      if (position) queryParams.append('position', position);
       if (bio) queryParams.append('bio', bio);
-      if (state) queryParams.append('state', state);
 
-      const response = await fetch(`http://10.0.2.2:8000/scoutbase/searchforathlete?${queryParams.toString()}`, {
+      const response = await fetch(`http://10.0.2.2:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -31,7 +26,7 @@ const SearchAthleteScreen = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch athletes');
+        throw new Error('Failed to fetch coaches');
       }
 
       const data = await response.json();
@@ -47,58 +42,46 @@ const SearchAthleteScreen = () => {
   const renderItem = ({ item }) => (
     <View style={styles.resultCard}>
       <View style={styles.profileContainer}>
-        {/* Check if there is a profile picture URL or use a default emoji */}
-        <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
-        <Text style={styles.resultText}>High School: {item.high_school_name}</Text>
-        <Text style={styles.resultText}>Positions: {item.positions}</Text>
-        <Text style={styles.resultText}>Height: {item.height}</Text>
-        <Text style={styles.resultText}>Weight: {item.weight}</Text>
-        <Text style={styles.resultText}>Bio: {item.bio}</Text>
-        <Text style={styles.resultText}>State: {item.state}</Text>
+        {item.profile_picture && item.profile_picture.startsWith('http') ? (
+          <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
+        ) : (
+          <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
+        )}
+        <View>
+          <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
+          <Text style={styles.resultText}>School Name: {item.school_name}</Text>
+          <Text style={styles.resultText}>Position: {item.position}</Text>
+          <Text style={styles.resultText}>Bio: {item.bio}</Text>
+        </View>
       </View>
     </View>
   );
-  
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="High School Name"
-        value={highSchoolName}
-        onChangeText={setHighSchoolName}
+        placeholder="Team Needs"
+        value={teamNeeds}
+        onChangeText={setTeamNeeds}
       />
       <TextInput
         style={styles.input}
-        placeholder="Positions"
-        value={positions}
-        onChangeText={setPositions}
+        placeholder="School Name"
+        value={schoolName}
+        onChangeText={setSchoolName}
       />
       <TextInput
         style={styles.input}
-        placeholder="Height"
-        value={height}
-        onChangeText={setHeight}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Weight"
-        value={weight}
-        onChangeText={setWeight}
-        keyboardType="numeric"
+        placeholder="Position"
+        value={position}
+        onChangeText={setPosition}
       />
       <TextInput
         style={styles.input}
         placeholder="Bio"
         value={bio}
         onChangeText={setBio}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="State"
-        value={state}
-        onChangeText={setState}
       />
       <Button title={isLoading ? 'Searching...' : 'Search'} onPress={handleSearch} disabled={isLoading} />
 
@@ -108,7 +91,7 @@ const SearchAthleteScreen = () => {
         renderItem={renderItem}
         contentContainerStyle={styles.resultsContainer}
         ListEmptyComponent={
-          !isLoading && <Text style={styles.noResults}>No athletes found matching the criteria</Text>
+          !isLoading && <Text style={styles.noResults}>No coaches found matching the criteria</Text>
         }
       />
     </View>
@@ -123,6 +106,12 @@ const styles = StyleSheet.create({
   profilePicture: {
     fontSize: 40,          
     marginRight: 12,       
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
   },
   container: {
     flex: 1,
@@ -164,4 +153,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchAthleteScreen;
+export default SearchCoachScreen;

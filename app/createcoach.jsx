@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, Image } from 'react-native';
+import { View, TextInput, Button, Alert, StyleSheet, Image, Platform, Text } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -10,7 +10,7 @@ const CreateCoachProfileScreen = () => {
   const [schoolName, setSchoolName] = useState('');
   const [position, setPosition] = useState('');
   const [bio, setBio] = useState('');
-  const [profilePicture, setProfilePicture] = useState(null); 
+  const [profilePicture, setProfilePicture] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -43,11 +43,10 @@ const CreateCoachProfileScreen = () => {
     }
   };
 
-  // Image picker function
-  const handleImagePicker = async () => {
+  const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (permissionResult.granted === false) {
+    if (!permissionResult.granted) {
       Alert.alert('Permission required', 'You need to grant permission to select an image.');
       return;
     }
@@ -60,7 +59,13 @@ const CreateCoachProfileScreen = () => {
     });
 
     if (!pickerResult.canceled) {
-      setProfilePicture(pickerResult.uri); // Store the image URI
+      let localUri = pickerResult.assets[0].uri;
+
+      if (Platform.OS === 'ios') {
+        localUri = localUri.replace('file://', '');
+      }
+
+      setProfilePicture(localUri);
     }
   };
 
@@ -78,13 +83,12 @@ const CreateCoachProfileScreen = () => {
     profileData.append('bio', bio);
 
     if (profilePicture) {
-      const uri = profilePicture;
-      const localUri = uri;
-      const filename = localUri.split('/').pop();
-      const type = `image/${filename.split('.').pop()}`;
+      const filename = profilePicture.split('/').pop();
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image';
 
       profileData.append('profile_picture', {
-        uri: localUri,
+        uri: profilePicture,
         name: filename,
         type,
       });
@@ -96,8 +100,10 @@ const CreateCoachProfileScreen = () => {
         body: profileData,
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create coach profile.');
+        throw new Error(responseData?.message || 'Failed to create coach profile.');
       }
 
       Alert.alert('Success', 'Coach profile created successfully!');
@@ -141,7 +147,7 @@ const CreateCoachProfileScreen = () => {
         <Image source={{ uri: profilePicture }} style={styles.profileImage} />
       )}
 
-      <Button title="Choose Profile Picture" onPress={handleImagePicker} />
+      <Button title="Choose Profile Picture" onPress={pickImage} />
       {profilePicture && <Text>Image Selected: {profilePicture.split('/').pop()}</Text>}
       
       <Button title="Create Profile" onPress={handleCreateProfile} />

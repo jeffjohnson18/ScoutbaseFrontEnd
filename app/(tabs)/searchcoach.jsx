@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image } from 'react-native';
 
 const SearchCoachScreen = () => {
   const [teamNeeds, setTeamNeeds] = useState('');
@@ -12,7 +12,6 @@ const SearchCoachScreen = () => {
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      // Construct the query string based on provided input
       const queryParams = new URLSearchParams();
       if (teamNeeds) queryParams.append('team_needs', teamNeeds);
       if (schoolName) queryParams.append('school_name', schoolName);
@@ -43,16 +42,20 @@ const SearchCoachScreen = () => {
   const renderItem = ({ item }) => (
     <View style={styles.resultCard}>
       <View style={styles.profileContainer}>
-        {/* Check if there is a profile picture URL or use a default emoji */}
-        <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
-        <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
-        <Text style={styles.resultText}>School Name: {item.school_name}</Text>
-        <Text style={styles.resultText}>Position: {item.position}</Text>
-        <Text style={styles.resultText}>Bio: {item.bio}</Text>
+        {item.profile_picture && item.profile_picture.startsWith('http') ? (
+          <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
+        ) : (
+          <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
+        )}
+        <View>
+          <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
+          <Text style={styles.resultText}>School Name: {item.school_name}</Text>
+          <Text style={styles.resultText}>Position: {item.position}</Text>
+          <Text style={styles.resultText}>Bio: {item.bio}</Text>
+        </View>
       </View>
     </View>
   );
-  
 
   return (
     <View style={styles.container}>
@@ -103,6 +106,12 @@ const styles = StyleSheet.create({
   profilePicture: {
     fontSize: 40,          
     marginRight: 12,       
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
   },
   container: {
     flex: 1,

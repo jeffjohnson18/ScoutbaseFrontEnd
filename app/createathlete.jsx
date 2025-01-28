@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet, Image, Platform } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { Image } from 'react-native';
-
 
 const CreateAthleteProfileScreen = () => {
   const [userId, setUserId] = useState(null);
@@ -12,6 +10,7 @@ const CreateAthleteProfileScreen = () => {
   const [positions, setPositions] = useState('');
   const [youtubeVideoLink, setYoutubeVideoLink] = useState('');
   const [profilePicture, setProfilePicture] = useState(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [bio, setBio] = useState('');
@@ -26,14 +25,10 @@ const CreateAthleteProfileScreen = () => {
     try {
       const response = await fetch('http://10.0.2.2:8000/scoutbase/user', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to retrieve token');
-      }
+      if (!response.ok) throw new Error('Failed to retrieve token');
 
       const token = await response.text();
       const decodedToken = jwtDecode(token);
@@ -48,11 +43,10 @@ const CreateAthleteProfileScreen = () => {
     }
   };
 
-  // Image picker function
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (permissionResult.granted === false) {
+    if (!permissionResult.granted) {
       Alert.alert('Permission required', 'You need to grant permission to select an image.');
       return;
     }
@@ -65,7 +59,13 @@ const CreateAthleteProfileScreen = () => {
     });
 
     if (!pickerResult.canceled) {
-      setProfilePicture(pickerResult.uri); // Store the image URI
+      let localUri = pickerResult.assets[0].uri;
+      
+      if (Platform.OS === 'ios') {
+        localUri = localUri.replace('file://', '');
+      }
+
+      setProfilePicture(localUri);
     }
   };
 
@@ -86,13 +86,12 @@ const CreateAthleteProfileScreen = () => {
     profileData.append('state', state);
 
     if (profilePicture) {
-      const uri = profilePicture;
-      const localUri = uri;
-      const filename = localUri.split('/').pop();
-      const type = `image/${filename.split('.').pop()}`;
+      const filename = profilePicture.split('/').pop();
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image';
 
       profileData.append('profile_picture', {
-        uri: localUri,
+        uri: profilePicture,
         name: filename,
         type,
       });
@@ -104,8 +103,14 @@ const CreateAthleteProfileScreen = () => {
         body: profileData,
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create athlete profile.');
+        throw new Error(responseData?.message || 'Failed to create athlete profile.');
+      }
+
+      if (responseData.profile_picture) {
+        setUploadedImageUrl(`http://10.0.2.2:8000${responseData.profile_picture}`);
       }
 
       Alert.alert('Success', 'Athlete profile created successfully!');
@@ -118,60 +123,24 @@ const CreateAthleteProfileScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="High School Name"
-        value={highSchoolName}
-        onChangeText={setHighSchoolName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Positions (e.g., Pitcher, Outfielder)"
-        value={positions}
-        onChangeText={setPositions}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="YouTube Video Link (optional)"
-        value={youtubeVideoLink}
-        onChangeText={setYoutubeVideoLink}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Height (e.g., 6.1)"
-        value={height}
-        onChangeText={setHeight}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Weight (e.g., 180)"
-        value={weight}
-        onChangeText={setWeight}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Bio"
-        value={bio}
-        onChangeText={setBio}
-        multiline
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="State"
-        value={state}
-        onChangeText={setState}
-      />
-      {/* Display selected profile picture */}
-      {profilePicture && (
-        <Image source={{ uri: profilePicture }} style={styles.profileImage} />
-      )}
+      <TextInput style={styles.input} placeholder="High School Name" value={highSchoolName} onChangeText={setHighSchoolName} />
+      <TextInput style={styles.input} placeholder="Positions (e.g., Pitcher, Outfielder)" value={positions} onChangeText={setPositions} />
+      <TextInput style={styles.input} placeholder="YouTube Video Link (optional)" value={youtubeVideoLink} onChangeText={setYoutubeVideoLink} />
+      <TextInput style={styles.input} placeholder="Height (e.g., 6.1)" value={height} onChangeText={setHeight} keyboardType="numeric" />
+      <TextInput style={styles.input} placeholder="Weight (e.g., 180)" value={weight} onChangeText={setWeight} keyboardType="numeric" />
+      <TextInput style={styles.input} placeholder="Bio" value={bio} onChangeText={setBio} multiline />
+      <TextInput style={styles.input} placeholder="State" value={state} onChangeText={setState} />
 
+      {/* Display selected profile picture */}
+      {profilePicture && <Image source={{ uri: profilePicture }} style={styles.profileImage} />}
 
       <Button title="Select Profile Picture" onPress={pickImage} />
       {profilePicture && <Text>Image Selected: {profilePicture.split('/').pop()}</Text>}
+
       <Button title="Create Profile" onPress={handleCreateProfile} />
+
+      {/* Display uploaded profile picture */}
+      {uploadedImageUrl ? <Image source={{ uri: uploadedImageUrl }} style={styles.profileImage} /> : null}
     </View>
   );
 };
@@ -192,6 +161,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     backgroundColor: '#fff',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignSelf: 'center',
+    marginVertical: 10,
   },
 });
 

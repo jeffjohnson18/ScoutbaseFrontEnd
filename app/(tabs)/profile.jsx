@@ -60,7 +60,13 @@ const ProfileScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
-      {profileData.profile_picture && <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />}
+      <View style={styles.profileContainer}>
+        {profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
+          <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+        ) : (
+          <Text style={styles.profilePicture}>{profileData.profile_picture || '👤'}</Text>
+        )}
+      </View>
       {role === 'Athlete' ? (
         <>
           <Text style={styles.infoText}>High School: {profileData.high_school_name}</Text>
@@ -85,7 +91,6 @@ const ProfileScreen = () => {
         onPress={() => role === 'Athlete' ? router.push('/editathleteprofile') : router.push('/editcoachprofile')}
       />
 
-
       {/* Logout Button */}
       <Button title="Logout" onPress={async () => {
         await fetch('http://10.0.2.2:8000/scoutbase/logout', { method: 'POST' });
@@ -99,7 +104,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  profileImage: { width: 120, height: 120, borderRadius: 60, alignSelf: 'center', marginBottom: 20 },
+  profileContainer: { flexDirection: 'row', alignItems: 'center' },
+  profilePicture: { fontSize: 40, marginRight: 12 },
+  profileImage: { width: 120, height: 120, borderRadius: 60, marginRight: 12 },
   infoText: { fontSize: 16, marginBottom: 8 },
   errorText: { fontSize: 18, color: 'red', textAlign: 'center' },
 });
