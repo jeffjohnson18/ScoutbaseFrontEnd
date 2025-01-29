@@ -2,12 +2,20 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router'; 
 import { jwtDecode } from 'jwt-decode';
+import { useFonts } from 'expo-font';
 
 const LoginScreen = () => {
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter(); 
+
+  const [fontsLoaded] = useFonts({
+      'FactoriaBoldItalic': require('../assets/fonts/FactoriaTest-BoldItalic.otf'),
+      'FactoriaMediumItalic': require('../assets/fonts/FactoriaTest-MediumItalic.otf'),
+      'FactoriaMedium': require('../assets/fonts/FactoriaTest-Medium.otf'),
+      'IntegralCF-Regular': require('../assets/fonts/Fontspring-DEMO-integralcf-regular.otf'),
+    });
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -104,18 +112,30 @@ const LoginScreen = () => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Login" style={styles.button} onPress={handleLogin} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  button: {
+    fontFamily: 'IntegralCF-Regular',
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 13,
+    backgroundColor: '#1f8bde',
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    color: 'white',
+    width: '100%',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
     backgroundColor: '#f5f5f5',
+
   },
   input: {
     width: '100%',
@@ -126,6 +146,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     backgroundColor: '#fff',
+    fontFamily: 'FactoriaMedium',
   },
 });
 
