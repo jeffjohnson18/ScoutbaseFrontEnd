@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
+import { useFonts } from 'expo-font';
 
 const RoleAssignmentScreen = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const [fontsLoaded] = useFonts({
+      'FactoriaBoldItalic': require('../assets/fonts/FactoriaTest-BoldItalic.otf'),
+      'FactoriaMediumItalic': require('../assets/fonts/FactoriaTest-MediumItalic.otf'),
+    });
 
   const fetchTokenAndDecode = async () => {
     try {
@@ -86,8 +92,8 @@ const RoleAssignmentScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Assign a Role</Text>
-
+      <Text style={styles.title}>Scoutbase</Text>
+      <Text style={styles.subtitle}>SIGN UP AS</Text>
       <Button
         title="Athlete"
         onPress={() => setSelectedRole('Athlete')}
@@ -103,7 +109,6 @@ const RoleAssignmentScreen = () => {
         onPress={() => setSelectedRole('Scout')}
         color={selectedRole === 'Scout' ? '#4caf50' : '#2196f3'}
       />
-
       <View style={styles.buttonContainer}>
         <Button
           title={isLoading ? 'Assigning...' : 'Assign Role'}
@@ -126,6 +131,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 20,
+    fontFamily: 'FactoriaBoldItalic',
+  },
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    fontFamily: 'FactoriaMediumItalic',
   },
   buttonContainer: {
     marginTop: 20,

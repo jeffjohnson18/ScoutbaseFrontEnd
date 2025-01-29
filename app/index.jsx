@@ -8,8 +8,11 @@ const { width } = Dimensions.get('window');
 export default function Home() {
 
   const [fontsLoaded] = useFonts({
-    'Factoria': require('../assets/fonts/FactoriaTest-BoldItalic-BF65c2f4a92f9ad.otf'),
-  });
+        'FactoriaBoldItalic': require('../assets/fonts/FactoriaTest-BoldItalic.otf'),
+        'FactoriaMediumItalic': require('../assets/fonts/FactoriaTest-MediumItalic.otf'),
+        'FactoriaMedium': require('../assets/fonts/FactoriaTest-Medium.otf'),
+        'IntegralCF-Regular': require('../assets/fonts/Fontspring-DEMO-integralcf-regular.otf'),
+      });
 
   return (
     <View
@@ -20,7 +23,12 @@ export default function Home() {
         marginTop: 100,
       }}
     >
-      <Text style={{ fontSize: 45, fontFamily: 'Factoria' }}>Scoutbase</Text>
+      <Text style={{ fontSize: 45, fontFamily: 'FactoriaBoldItalic', lineHeight: 40 }}>
+        <Text style={{ color: 'black' }}>Scout</Text>
+        <Text style={{ color: '#1f8bde' }}>base</Text>
+      </Text>
+
+
       <View
         style={{
           backgroundColor: '#9c0b0b',
@@ -28,10 +36,10 @@ export default function Home() {
           paddingHorizontal: 20,
           width: width * 0.75,
           alignSelf: 'center',
-          marginTop: 20,
+          marginTop: 50,
         }}
       >
-        <Link href="/login" style={{ color: 'white', fontFamily: 'Factoria', fontSize: 20, textAlign: 'center' }}>
+        <Link href="/login" style={{ color: 'white', fontFamily: 'FactoriaMediumItalic', fontSize: 20, textAlign: 'center', lineHeight: 30 }}>
           Login
         </Link>
       </View>
@@ -45,7 +53,7 @@ export default function Home() {
           marginTop: 10,
         }}
       >
-        <Link href="/register" style={{ color: 'white', fontFamily: 'Factoria', fontSize: 20, textAlign: 'center' }}>
+        <Link href="/register" style={{ color: 'white', fontFamily: 'FactoriaMediumItalic', fontSize: 20, textAlign: 'center', lineHeight: 30 }}>
           Register
         </Link>
       </View>

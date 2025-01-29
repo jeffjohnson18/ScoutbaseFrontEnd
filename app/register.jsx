@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router'; 
+import { View, TextInput, TouchableOpacity , Alert, StyleSheet, Text } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useFonts } from 'expo-font';
 
 const RegistrationScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter(); 
+  const router = useRouter();
+
+
+  const [fontsLoaded] = useFonts({
+    'FactoriaBoldItalic': require('../assets/fonts/FactoriaTest-BoldItalic.otf'),
+    'FactoriaMediumItalic': require('../assets/fonts/FactoriaTest-MediumItalic.otf'),
+    'FactoriaMedium': require('../assets/fonts/FactoriaTest-Medium.otf'),
+    'IntegralCF-Regular': require('../assets/fonts/Fontspring-DEMO-integralcf-regular.otf'),
+  });
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
@@ -30,7 +39,7 @@ const RegistrationScreen = () => {
       Alert.alert('Success', 'Registration successful!', [
         {
           text: 'OK',
-          onPress: () => router.push('/login'), // Navigate to the login page
+          onPress: () => router.push('/login'),
         },
       ]);
     } catch (error) {
@@ -41,15 +50,16 @@ const RegistrationScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.guidedText}>Create an Account</Text>
       <TextInput
         style={styles.input}
-        placeholder="Name"
+        placeholder="Full Name"
         value={name}
         onChangeText={setName}
       />
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Email Address"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -60,14 +70,34 @@ const RegistrationScreen = () => {
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
+        secureTextEntry={true}
       />
-      <Button title="Register" onPress={handleRegister} />
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <Text style={styles.button}>Continue</Text>
+      </TouchableOpacity>     
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  button: {
+    fontFamily: 'IntegralCF-Regular',
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 13,
+    backgroundColor: '#1f8bde',
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    color: 'white',
+    width: '100%',
+  },
+  guidedText: {
+    fontFamily: 'IntegralCF-Regular',
+    fontSize: 14,
+    lineHeight: 30,
+    marginBottom: 20,
+    alignItems: 'left'
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -76,6 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   input: {
+    fontFamily: 'FactoriaMedium',
     width: '100%',
     height: 40,
     borderColor: '#ccc',
