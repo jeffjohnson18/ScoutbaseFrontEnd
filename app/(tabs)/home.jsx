@@ -1,6 +1,17 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+/**
+ * Home Screen Component
+ * Main landing page after user authentication displaying featured articles and updates.
+ * @module HomeScreen
+ */
 
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+
+/**
+ * Featured articles data
+ * Static content displayed on the home screen
+ * @constant {Array<Object>} articles
+ */
 const articles = [
   {
     id: 1,
@@ -19,10 +30,21 @@ const articles = [
   },
 ];
 
+/**
+ * HomePage Component
+ * Displays welcome message and featured articles for users
+ * @component
+ */
 const HomePage = ({ navigation }) => {
+  /**
+   * Render the home screen interface
+   */
   return (
     <ScrollView style={styles.container}>
+      {/* Welcome Header */}
       <Text style={styles.header}>Welcome to Scoutbase!</Text>
+
+      {/* Featured Articles Section */}
       {articles.map((article) => (
         <TouchableOpacity
           key={article.id}
@@ -39,6 +61,10 @@ const HomePage = ({ navigation }) => {
   );
 };
 
+/**
+ * Styles for the HomePage component
+ * Defines the visual appearance of all UI elements
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -56,6 +82,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
+    // Card shadow styling
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,

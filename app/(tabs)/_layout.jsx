@@ -1,26 +1,49 @@
+/**
+ * Tab Navigation Layout Component
+ * Configures and manages the bottom tab navigation structure of the application.
+ * @module TabLayout
+ */
+
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 
+/**
+ * Layout Component
+ * Defines the tab-based navigation structure and styling for the main application flow.
+ * Includes tabs for Home, Search Coach, Search Athlete, and Profile sections.
+ * @component
+ */
 export default function Layout() {
   return (
     <Tabs
       screenOptions={({ route }) => ({
+        // Configure tab bar visibility and styling based on route
         tabBarStyle: [
-          route.name === 'home' || route.name === 'searchcoach' || route.name === 'searchathlete' || route.name === 'profile'
+          // Show tab bar only for main navigation routes
+          route.name === 'home' || 
+          route.name === 'searchcoach' || 
+          route.name === 'searchathlete' || 
+          route.name === 'profile'
             ? {
-              backgroundColor: '#ffffff',
-              borderTopWidth: 1,
-              borderTopColor: '#ddd',
-              height: 60,
-              paddingBottom: 5,
-            }
-            : { display: 'none' },
+                // Tab bar styling when visible
+                backgroundColor: '#ffffff',
+                borderTopWidth: 1,
+                borderTopColor: '#ddd',
+                height: 60,
+                paddingBottom: 5,
+              }
+            : { 
+                // Hide tab bar for other routes
+                display: 'none' 
+              },
         ],
-        tabBarActiveTintColor: '#1e90ff',
-        tabBarInactiveTintColor: '#666',
-        headerShown: false,
+        // Tab bar colors for active and inactive states
+        tabBarActiveTintColor: '#1e90ff',    // Active tab color
+        tabBarInactiveTintColor: '#666',     // Inactive tab color
+        headerShown: false,                  // Hide header for all tab screens
       })}
     >
+      {/* Home Tab */}
       <Tabs.Screen
         name="home"
         options={{
@@ -30,6 +53,8 @@ export default function Layout() {
           ),
         }}
       />
+
+      {/* Search Coach Tab */}
       <Tabs.Screen
         name="searchcoach"
         options={{
@@ -39,6 +64,8 @@ export default function Layout() {
           ),
         }}
       />
+
+      {/* Search Athlete Tab */}
       <Tabs.Screen
         name="searchathlete"
         options={{
@@ -48,6 +75,8 @@ export default function Layout() {
           ),
         }}
       />
+
+      {/* Profile Tab */}
       <Tabs.Screen
         name="profile"
         options={{

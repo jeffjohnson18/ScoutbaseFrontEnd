@@ -1,15 +1,28 @@
+/**
+ * Registration Screen Component
+ * Handles user registration functionality including form input and API integration.
+ * @module RegistrationScreen
+ */
+
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity , Alert, StyleSheet, Text } from 'react-native';
+import { View, TextInput, TouchableOpacity, Alert, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 
+/**
+ * RegistrationScreen Component
+ * Provides a user interface for new user registration with form validation
+ * and API integration for account creation.
+ * @component
+ */
 const RegistrationScreen = () => {
+  // State management for form inputs
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
 
-
+  // Load custom fonts for the application
   const [fontsLoaded] = useFonts({
     'FactoriaBoldItalic': require('../assets/fonts/FactoriaTest-BoldItalic.otf'),
     'FactoriaMediumItalic': require('../assets/fonts/FactoriaTest-MediumItalic.otf'),
@@ -17,13 +30,21 @@ const RegistrationScreen = () => {
     'IntegralCF-Regular': require('../assets/fonts/Fontspring-DEMO-integralcf-regular.otf'),
   });
 
+  /**
+   * Handles the registration process
+   * Validates form inputs and sends registration request to backend
+   * @async
+   * @function handleRegister
+   */
   const handleRegister = async () => {
+    // Form validation
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     try {
+      // Send registration request to backend
       const response = await fetch('http://10.0.2.2:8000/scoutbase/register', {
         method: 'POST',
         headers: {
@@ -36,6 +57,7 @@ const RegistrationScreen = () => {
         throw new Error('Registration failed');
       }
 
+      // Show success message and redirect to login
       Alert.alert('Success', 'Registration successful!', [
         {
           text: 'OK',
@@ -48,15 +70,20 @@ const RegistrationScreen = () => {
     }
   };
 
+  /**
+   * Render the registration form interface
+   */
   return (
     <View style={styles.container}>
       <Text style={styles.guidedText}>Create an Account</Text>
+      {/* Name input field */}
       <TextInput
         style={styles.input}
         placeholder="Full Name"
         value={name}
         onChangeText={setName}
       />
+      {/* Email input field */}
       <TextInput
         style={styles.input}
         placeholder="Email Address"
@@ -65,6 +92,7 @@ const RegistrationScreen = () => {
         keyboardType="email-address"
         autoCapitalize="none"
       />
+      {/* Password input field */}
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -72,6 +100,7 @@ const RegistrationScreen = () => {
         onChangeText={setPassword}
         secureTextEntry={true}
       />
+      {/* Registration submit button */}
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.button}>Continue</Text>
       </TouchableOpacity>     
@@ -79,6 +108,10 @@ const RegistrationScreen = () => {
   );
 };
 
+/**
+ * Styles for the RegistrationScreen component
+ * Defines the visual appearance of all UI elements
+ */
 const styles = StyleSheet.create({
   button: {
     fontFamily: 'IntegralCF-Regular',

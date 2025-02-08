@@ -1,24 +1,47 @@
+/**
+ * Search Athlete Screen Component
+ * Provides functionality to search and display athlete profiles based on various criteria.
+ * @module SearchAthleteScreen
+ */
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image } from 'react-native';
 
-const SearchCoachScreen = () => {
-  const [teamNeeds, setTeamNeeds] = useState('');
-  const [schoolName, setSchoolName] = useState('');
-  const [position, setPosition] = useState('');
+/**
+ * SearchAthleteScreen Component
+ * Allows users to search for athletes using filters such as high school,
+ * positions, physical attributes, and bio information.
+ * @component
+ */
+const SearchAthleteScreen = () => {
+  // State management for search filters and results
+  const [highSchool, setHighSchool] = useState('');
+  const [positions, setPositions] = useState('');
   const [bio, setBio] = useState('');
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * Handles the athlete search process
+   * Constructs query parameters and fetches matching athlete profiles
+   * @async
+   * @function handleSearch
+   */
   const handleSearch = async () => {
     setIsLoading(true);
     try {
+      // Construct query parameters from filled fields
       const queryParams = new URLSearchParams();
-      if (teamNeeds) queryParams.append('team_needs', teamNeeds);
-      if (schoolName) queryParams.append('school_name', schoolName);
-      if (position) queryParams.append('position', position);
+      if (highSchool) queryParams.append('high_school_name', highSchool);
+      if (positions) queryParams.append('positions', positions);
       if (bio) queryParams.append('bio', bio);
+      if (height) queryParams.append('height', height);
+      if (weight) queryParams.append('weight', weight);
 
-      const response = await fetch(`http://10.0.2.2:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
+      // Send search request to backend
+      const response = await fetch(`http://10.0.2.2:8000/scoutbase/searchforathlete?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -26,7 +49,7 @@ const SearchCoachScreen = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch coaches');
+        throw new Error('Failed to fetch athletes');
       }
 
       const data = await response.json();
@@ -39,43 +62,63 @@ const SearchCoachScreen = () => {
     }
   };
 
+  /**
+   * Renders individual athlete profile cards in the results list
+   * @function renderItem
+   * @param {Object} item - Athlete profile data to display
+   */
   const renderItem = ({ item }) => (
     <View style={styles.resultCard}>
       <View style={styles.profileContainer}>
+        {/* Profile picture display - shows image or default icon */}
         {item.profile_picture && item.profile_picture.startsWith('http') ? (
           <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
         ) : (
-          <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
+          <Text style={styles.profilePicture}>{item.profile_picture || '⚾'}</Text>
         )}
+        {/* Athlete profile details */}
         <View>
-          <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
-          <Text style={styles.resultText}>School Name: {item.school_name}</Text>
-          <Text style={styles.resultText}>Position: {item.position}</Text>
+          <Text style={styles.resultText}>High School: {item.high_school_name}</Text>
+          <Text style={styles.resultText}>Positions: {item.positions}</Text>
+          <Text style={styles.resultText}>Height: {item.height} inches</Text>
+          <Text style={styles.resultText}>Weight: {item.weight} lbs</Text>
           <Text style={styles.resultText}>Bio: {item.bio}</Text>
         </View>
       </View>
     </View>
   );
 
+  /**
+   * Render the search interface and results
+   */
   return (
     <View style={styles.container}>
+      {/* Search filters */}
       <TextInput
         style={styles.input}
-        placeholder="Team Needs"
-        value={teamNeeds}
-        onChangeText={setTeamNeeds}
+        placeholder="High School"
+        value={highSchool}
+        onChangeText={setHighSchool}
       />
       <TextInput
         style={styles.input}
-        placeholder="School Name"
-        value={schoolName}
-        onChangeText={setSchoolName}
+        placeholder="Positions"
+        value={positions}
+        onChangeText={setPositions}
       />
       <TextInput
         style={styles.input}
-        placeholder="Position"
-        value={position}
-        onChangeText={setPosition}
+        placeholder="Height (in inches)"
+        value={height}
+        onChangeText={setHeight}
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Weight (in lbs)"
+        value={weight}
+        onChangeText={setWeight}
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
@@ -83,21 +126,32 @@ const SearchCoachScreen = () => {
         value={bio}
         onChangeText={setBio}
       />
-      <Button title={isLoading ? 'Searching...' : 'Search'} onPress={handleSearch} disabled={isLoading} />
 
+      {/* Search button */}
+      <Button 
+        title={isLoading ? 'Searching...' : 'Search'} 
+        onPress={handleSearch} 
+        disabled={isLoading} 
+      />
+
+      {/* Results list */}
       <FlatList
         data={results}
         keyExtractor={(item, index) => index.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.resultsContainer}
         ListEmptyComponent={
-          !isLoading && <Text style={styles.noResults}>No coaches found matching the criteria</Text>
+          !isLoading && <Text style={styles.noResults}>No athletes found matching the criteria</Text>
         }
       />
     </View>
   );
 };
 
+/**
+ * Styles for the SearchAthleteScreen component
+ * Defines the visual appearance of all UI elements
+ */
 const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: 'row',  
@@ -153,4 +207,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchCoachScreen;
+export default SearchAthleteScreen;

@@ -1,7 +1,20 @@
+/**
+ * Search Coach Screen Component
+ * Provides functionality to search and display coach profiles based on various criteria.
+ * @module SearchCoachScreen
+ */
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image } from 'react-native';
 
+/**
+ * SearchCoachScreen Component
+ * Allows users to search for coaches using filters such as team needs,
+ * school name, position, and bio information.
+ * @component
+ */
 const SearchCoachScreen = () => {
+  // State management for search filters and results
   const [teamNeeds, setTeamNeeds] = useState('');
   const [schoolName, setSchoolName] = useState('');
   const [position, setPosition] = useState('');
@@ -9,15 +22,23 @@ const SearchCoachScreen = () => {
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * Handles the coach search process
+   * Constructs query parameters and fetches matching coach profiles
+   * @async
+   * @function handleSearch
+   */
   const handleSearch = async () => {
     setIsLoading(true);
     try {
+      // Construct query parameters from filled fields
       const queryParams = new URLSearchParams();
       if (teamNeeds) queryParams.append('team_needs', teamNeeds);
       if (schoolName) queryParams.append('school_name', schoolName);
       if (position) queryParams.append('position', position);
       if (bio) queryParams.append('bio', bio);
 
+      // Send search request to backend
       const response = await fetch(`http://10.0.2.2:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
@@ -39,14 +60,21 @@ const SearchCoachScreen = () => {
     }
   };
 
+  /**
+   * Renders individual coach profile cards in the results list
+   * @function renderItem
+   * @param {Object} item - Coach profile data to display
+   */
   const renderItem = ({ item }) => (
     <View style={styles.resultCard}>
       <View style={styles.profileContainer}>
+        {/* Profile picture display - shows image or default icon */}
         {item.profile_picture && item.profile_picture.startsWith('http') ? (
           <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
         ) : (
           <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
         )}
+        {/* Coach profile details */}
         <View>
           <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
           <Text style={styles.resultText}>School Name: {item.school_name}</Text>
@@ -57,8 +85,12 @@ const SearchCoachScreen = () => {
     </View>
   );
 
+  /**
+   * Render the search interface and results
+   */
   return (
     <View style={styles.container}>
+      {/* Search filters */}
       <TextInput
         style={styles.input}
         placeholder="Team Needs"
@@ -83,8 +115,15 @@ const SearchCoachScreen = () => {
         value={bio}
         onChangeText={setBio}
       />
-      <Button title={isLoading ? 'Searching...' : 'Search'} onPress={handleSearch} disabled={isLoading} />
+      
+      {/* Search button */}
+      <Button 
+        title={isLoading ? 'Searching...' : 'Search'} 
+        onPress={handleSearch} 
+        disabled={isLoading} 
+      />
 
+      {/* Results list */}
       <FlatList
         data={results}
         keyExtractor={(item, index) => index.toString()}
@@ -98,6 +137,10 @@ const SearchCoachScreen = () => {
   );
 };
 
+/**
+ * Styles for the SearchCoachScreen component
+ * Defines the visual appearance of all UI elements
+ */
 const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: 'row',  
