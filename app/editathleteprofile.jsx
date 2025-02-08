@@ -34,7 +34,16 @@ const EditAthleteProfile = () => {
         const profile = await profileResponse.json();
         
         if (profile.length > 0) {
-          setProfileData(profile[0]); // Set existing data into the form
+          setProfileData({
+            high_school_name: profile[0]?.high_school_name || '',
+            positions: profile[0]?.positions || '',
+            youtube_video_link: profile[0]?.youtube_video_link || '',
+            profile_picture: profile[0]?.profile_picture || '',
+            height: profile[0]?.height ? profile[0].height.toString() : '',
+            weight: profile[0]?.weight ? profile[0].weight.toString() : '',
+            bio: profile[0]?.bio || '',
+            state: profile[0]?.state || '',
+          });
         }
       } catch (error) {
         Alert.alert('Error', 'Failed to load profile data.');
@@ -48,21 +57,35 @@ const EditAthleteProfile = () => {
 
   const handleSave = async () => {
     try {
+      const requestBody = {
+        high_school_name: profileData.high_school_name || null,
+        positions: profileData.positions || null,
+        youtube_video_link: profileData.youtube_video_link || null,
+        profile_picture: profileData.profile_picture || null,
+        height: profileData.height ? parseFloat(profileData.height) : null,
+        weight: profileData.weight ? parseFloat(profileData.weight) : null,
+        bio: profileData.bio || null,
+        state: profileData.state || null,
+      };
+  
       const response = await fetch(`http://10.0.2.2:8000/scoutbase/editathlete/${userId}/`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profileData),
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
       });
-
-      if (!response.ok) throw new Error('Failed to update profile');
-
-      Alert.alert('Success', 'Profile updated successfully.');
-      router.push('/profile'); // Navigate back to profile page
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to update profile");
+      }
+  
+      Alert.alert("Success", "Profile updated successfully.");
+      router.push("/profile");
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to update profile.');
+      Alert.alert("Error", error.message || "Failed to update profile.");
     }
   };
-
+  
   if (isLoading) {
     return <ActivityIndicator size="large" color="#1e90ff" style={styles.loader} />;
   }
@@ -70,7 +93,7 @@ const EditAthleteProfile = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Edit Profile</Text>
-      
+
       <TextInput 
         style={styles.input} 
         placeholder="High School Name"
@@ -96,16 +119,16 @@ const EditAthleteProfile = () => {
         style={styles.input} 
         placeholder="Height (ft)"
         keyboardType="numeric"
-        value={profileData.height.toString()}
-        onChangeText={(text) => setProfileData({ ...profileData, height: parseFloat(text) || '' })}
+        value={profileData.height}
+        onChangeText={(text) => setProfileData({ ...profileData, height: text })}
       />
 
       <TextInput 
         style={styles.input} 
         placeholder="Weight (lbs)"
         keyboardType="numeric"
-        value={profileData.weight.toString()}
-        onChangeText={(text) => setProfileData({ ...profileData, weight: parseFloat(text) || '' })}
+        value={profileData.weight}
+        onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
       />
 
       <TextInput 
