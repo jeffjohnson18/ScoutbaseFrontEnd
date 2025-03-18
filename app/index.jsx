@@ -24,6 +24,9 @@ export default function Home() {
     'FactoriaMediumItalic': require('../assets/fonts/FactoriaTest-MediumItalic.otf'),
     'FactoriaMedium': require('../assets/fonts/FactoriaTest-Medium.otf'),
     'IntegralCF-Regular': require('../assets/fonts/Fontspring-DEMO-integralcf-regular.otf'),
+    'SupraSans-Regular': require('../assets/fonts/HvDTrial_SupriaSans-Regular-BF64868e7702378.otf'),
+    'SupraSans-HeavyOblique': require('../assets/fonts/HvDTrial_SupriaSans-HeavyOblique-BF64868e7702378.otf'),
+
   });
 
   /**
@@ -39,37 +42,12 @@ export default function Home() {
       }}
     >
       {/* Application Logo */}
-      <Text style={{ fontSize: 45, fontFamily: 'FactoriaBoldItalic', lineHeight: 40 }}>
+      <Text style={{ fontSize: 25, fontFamily: 'IntegralCF-Regular', lineHeight: 40 }}>
         <Text style={{ color: 'black' }}>Scout</Text>
         <Text style={{ color: '#1f8bde' }}>base</Text>
       </Text>
 
-      {/* Login Button */}
-      <View
-        style={{
-          backgroundColor: '#9c0b0b',
-          paddingVertical: 10,
-          paddingHorizontal: 20,
-          width: width * 0.75,
-          alignSelf: 'center',
-          marginTop: 50,
-        }}
-      >
-        <Link 
-          href="/login" 
-          style={{ 
-            color: 'white', 
-            fontFamily: 'FactoriaMediumItalic', 
-            fontSize: 20, 
-            textAlign: 'center', 
-            lineHeight: 30 
-          }}
-        >
-          Login
-        </Link>
-      </View>
-
-      {/* Register Button */}
+      {/* Register Button - Primary */}
       <View
         style={{
           backgroundColor: '#1f8bde',
@@ -77,7 +55,7 @@ export default function Home() {
           paddingHorizontal: 20,
           width: width * 0.75,
           alignSelf: 'center',
-          marginTop: 10,
+          marginTop: 50,
         }}
       >
         <Link 
@@ -91,6 +69,21 @@ export default function Home() {
           }}
         >
           Register
+        </Link>
+      </View>
+
+      {/* Login Text Link */}
+      <View style={{ marginTop: 20 }}>
+        <Link 
+          href="/login" 
+          style={{ 
+            color: '#666', 
+            fontFamily: 'FactoriaMedium', 
+            fontSize: 16, 
+            textAlign: 'center' 
+          }}
+        >
+          Already have an account? Login
         </Link>
       </View>
     </View>

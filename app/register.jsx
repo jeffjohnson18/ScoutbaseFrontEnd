@@ -75,6 +75,12 @@ const RegistrationScreen = () => {
    */
   return (
     <View style={styles.container}>
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => router.push('/')}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
       <Text style={styles.guidedText}>Create an Account</Text>
       {/* Name input field */}
       <TextInput
@@ -148,6 +154,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     backgroundColor: '#fff',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 16,
+  },
+  backButtonText: {
+    fontFamily: 'FactoriaMedium',
+    fontSize: 16,
+    color: '#1f8bde',
   },
 });
 

@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, TextInput, Button, Alert, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { useRouter } from 'expo-router'; 
 import { jwtDecode } from 'jwt-decode';
 import { useFonts } from 'expo-font';
@@ -125,6 +125,13 @@ const LoginScreen = () => {
    */
   return (
     <View style={styles.container}>
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => router.push('/')}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+      
       {/* Email input field */}
       <TextInput
         style={styles.input}
@@ -181,6 +188,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     backgroundColor: '#fff',
     fontFamily: 'FactoriaMedium',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 16,
+  },
+  backButtonText: {
+    fontFamily: 'FactoriaMedium',
+    fontSize: 16,
+    color: '#1f8bde',
   },
 });
 
