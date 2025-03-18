@@ -89,7 +89,7 @@ const SearchAthleteScreen = () => {
       if (weight) queryParams.append('weight', weight);
 
       // Send search request to backend
-      const response = await fetch(`http://10.0.2.2:8000/scoutbase/searchforathlete?${queryParams.toString()}`, {
+      const response = await fetch(`http://localhost:8000/scoutbase/searchforathlete?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -5,9 +5,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, StyleSheet, Text, Animated, ActivityIndicator } from 'react-native';
+import { View, TextInput, TouchableOpacity, Alert, StyleSheet, Text, Animated, ActivityIndicator, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
+import { Ionicons } from '@expo/vector-icons';
 
 /**
  * RegistrationScreen Component
@@ -22,6 +23,7 @@ const RegistrationScreen = () => {
   const [password, setPassword] = useState('');
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Animation values
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -217,13 +219,25 @@ const RegistrationScreen = () => {
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={true}
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={[styles.input, { paddingRight: 45 }]}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <Pressable 
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons 
+              name={showPassword ? "eye-outline" : "eye-off-outline"} 
+              size={24} 
+              color="#666"
+            />
+          </Pressable>
+        </View>
 
         {/* Animated Register Button */}
         <Animated.View
@@ -268,7 +282,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 40,
+    height: 48,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 4,
@@ -330,6 +344,19 @@ const styles = StyleSheet.create({
     color: '#1f8bde',
     fontFamily: 'SupraSans-Regular',
     textAlign: 'center',
+  },
+  inputContainer: {
+    width: '100%',
+    position: 'relative',
+    marginBottom: 12,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 12,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 9
   },
 });
 

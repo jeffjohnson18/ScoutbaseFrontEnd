@@ -87,7 +87,7 @@ const SearchCoachScreen = () => {
       if (bio) queryParams.append('bio', bio);
 
       // Send search request to backend
-      const response = await fetch(`http://10.0.2.2:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
+      const response = await fetch(`http://localhost:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

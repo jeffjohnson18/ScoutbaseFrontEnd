@@ -5,10 +5,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, TouchableOpacity, Text, Animated, ActivityIndicator } from 'react-native';
+import { View, TextInput, Button, Alert, StyleSheet, TouchableOpacity, Text, Animated, ActivityIndicator, Pressable } from 'react-native';
 import { useRouter } from 'expo-router'; 
 import { jwtDecode } from 'jwt-decode';
 import { useFonts } from 'expo-font';
+import { Ionicons } from '@expo/vector-icons';
 
 /**
  * LoginScreen Component
@@ -23,6 +24,7 @@ const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userName, setUserName] = useState('');
   const router = useRouter(); 
+  const [showPassword, setShowPassword] = useState(false);
 
   // Load custom fonts for the application
   const [fontsLoaded] = useFonts({
@@ -236,13 +238,25 @@ const LoginScreen = () => {
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <Pressable 
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            <Ionicons 
+              name={showPassword ? "eye-outline" : "eye-off-outline"} 
+              size={24} 
+              color="#666"
+            />
+          </Pressable>
+        </View>
         
         {/* Animated Login Button */}
         <Animated.View
@@ -377,6 +391,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     marginTop: 12,
+  },
+  inputContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 12,
+    top: '50%',
+    transform: [{ translateY: -12 }],
   },
 });
 
