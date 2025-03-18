@@ -4,8 +4,8 @@
  * @module RegistrationScreen
  */
 
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Alert, StyleSheet, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, TouchableOpacity, Alert, StyleSheet, Text, Animated, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 
@@ -21,6 +21,14 @@ const RegistrationScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Animation values
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(50)).current;
+  const formFadeAnim = React.useRef(new Animated.Value(0)).current;
+  const formSlideAnim = React.useRef(new Animated.Value(30)).current;
+  const buttonFadeAnim = React.useRef(new Animated.Value(0)).current;
 
   // Load custom fonts for the application
   const [fontsLoaded] = useFonts({
@@ -28,7 +36,87 @@ const RegistrationScreen = () => {
     'FactoriaMediumItalic': require('../assets/fonts/FactoriaTest-MediumItalic.otf'),
     'FactoriaMedium': require('../assets/fonts/FactoriaTest-Medium.otf'),
     'IntegralCF-Regular': require('../assets/fonts/Fontspring-DEMO-integralcf-regular.otf'),
+    'SupraSans-Regular': require('../assets/fonts/HvDTrial_SupriaSans-Regular-BF64868e7702378.otf'),
+    'SupraSans-HeavyOblique': require('../assets/fonts/HvDTrial_SupriaSans-HeavyOblique-BF64868e75ae1fa.otf'),
   });
+
+  // Setup animations
+  useEffect(() => {
+    // Welcome message animation
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+      // Form elements animation
+      Animated.parallel([
+        Animated.timing(formFadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(formSlideAnim, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+
+    // Button animation based on form completion
+    if (name.length > 0 && email.length > 0 && password.length > 0) {
+      Animated.timing(buttonFadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(buttonFadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [name, email, password]);
+
+  // Add login function
+  const loginAfterRegistration = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:8000/scoutbase/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      const token = data.jwt;
+
+      if (!token) {
+        throw new Error('No token found in response');
+      }
+
+      router.push('/roleassignment');
+
+    } catch (error) {
+      Alert.alert('Error', 'Auto-login failed. Please log in manually.');
+      console.error('Login Error:', error);
+      router.push('/login');
+    }
+  };
 
   /**
    * Handles the registration process
@@ -37,15 +125,15 @@ const RegistrationScreen = () => {
    * @function handleRegister
    */
   const handleRegister = async () => {
-    // Form validation
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     try {
-      // Send registration request to backend
-      const response = await fetch('http://10.0.2.2:8000/scoutbase/register', {
+      setIsLoading(true);
+
+      const response = await fetch('http://localhost:8000/scoutbase/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,18 +145,23 @@ const RegistrationScreen = () => {
         throw new Error('Registration failed');
       }
 
-      // Show success message and redirect to login
-      Alert.alert('Success', 'Registration successful!', [
-        {
-          text: 'OK',
-          onPress: () => router.push('/login'),
-        },
-      ]);
+      await loginAfterRegistration(email, password);
+
     } catch (error) {
+      setIsLoading(false);
       Alert.alert('Error', 'Registration failed. Please try again.');
-      console.error(error);
+      console.error('Registration Error:', error);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#1f8bde" />
+        <Text style={styles.loadingText}>Logging you in...</Text>
+      </View>
+    );
+  }
 
   /**
    * Render the registration form interface
@@ -81,35 +174,82 @@ const RegistrationScreen = () => {
       >
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
-      <Text style={styles.guidedText}>Create an Account</Text>
-      {/* Name input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={name}
-        onChangeText={setName}
-      />
-      {/* Email input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email Address"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      {/* Password input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry={true}
-      />
-      {/* Registration submit button */}
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.button}>Continue</Text>
-      </TouchableOpacity>     
+
+      {/* Animated Welcome Message */}
+      <Animated.View 
+        style={[
+          styles.welcomeContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }
+        ]}
+      >
+        <Text style={styles.welcomeText}>Welcome!</Text>
+        <Text style={[styles.welcomeSubtext, { 
+          fontSize: 14,  // Reduced from 16
+          textAlign: 'center', // Ensure text is centered
+          paddingHorizontal: 20, // Add some padding for longer text
+        }]}>
+          Please enter the following details to create an account
+        </Text>
+      </Animated.View>
+
+      {/* Animated Form Container */}
+      <Animated.View 
+        style={{
+          width: '100%',
+          opacity: formFadeAnim,
+          transform: [{ translateY: formSlideAnim }],
+        }}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email Address"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={true}
+        />
+
+        {/* Animated Register Button */}
+        <Animated.View
+          style={{
+            opacity: buttonFadeAnim,
+            transform: [
+              {
+                translateY: buttonFadeAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              },
+            ],
+          }}
+        >
+          <TouchableOpacity 
+            style={[
+              styles.registerButton,
+              { pointerEvents: name.length > 0 && email.length > 0 && password.length > 0 ? 'auto' : 'none' }
+            ]} 
+            onPress={handleRegister}
+          >
+            <Text style={styles.registerButtonText}>Create Account</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
     </View>
   );
 };
@@ -119,24 +259,6 @@ const RegistrationScreen = () => {
  * Defines the visual appearance of all UI elements
  */
 const styles = StyleSheet.create({
-  button: {
-    fontFamily: 'IntegralCF-Regular',
-    fontSize: 13,
-    textAlign: 'center',
-    lineHeight: 13,
-    backgroundColor: '#1f8bde',
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    color: 'white',
-    width: '100%',
-  },
-  guidedText: {
-    fontFamily: 'IntegralCF-Regular',
-    fontSize: 14,
-    lineHeight: 30,
-    marginBottom: 20,
-    alignItems: 'left'
-  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -145,7 +267,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   input: {
-    fontFamily: 'FactoriaMedium',
     width: '100%',
     height: 40,
     borderColor: '#ccc',
@@ -154,6 +275,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     backgroundColor: '#fff',
+    fontFamily: 'SupraSans-Regular',
   },
   backButton: {
     position: 'absolute',
@@ -161,9 +283,53 @@ const styles = StyleSheet.create({
     left: 16,
   },
   backButtonText: {
-    fontFamily: 'FactoriaMedium',
+    fontFamily: 'SupraSans-Regular',
     fontSize: 16,
     color: '#1f8bde',
+  },
+  welcomeContainer: {
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontFamily: 'SupraSans-HeavyOblique',
+    fontSize: 32,
+    color: '#1f8bde',
+    marginBottom: 8,
+  },
+  welcomeSubtext: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 14, // Updated base font size
+    color: '#666',
+    textAlign: 'center', // Added to style definition
+    paddingHorizontal: 20, // Added to style definition
+  },
+  registerButton: {
+    backgroundColor: '#1f8bde',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  registerButtonText: {
+    color: 'white',
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 20,
+    textAlign: 'center',
+    lineHeight: 30,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    marginTop: 20,
+    fontSize: 18,
+    color: '#1f8bde',
+    fontFamily: 'SupraSans-Regular',
+    textAlign: 'center',
   },
 });
 

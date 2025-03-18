@@ -4,8 +4,8 @@
  * @module LoginScreen
  */
 
-import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Button, Alert, StyleSheet, TouchableOpacity, Text, Animated, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router'; 
 import { jwtDecode } from 'jwt-decode';
 import { useFonts } from 'expo-font';
@@ -20,6 +20,8 @@ const LoginScreen = () => {
   // State management for form inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [userName, setUserName] = useState('');
   const router = useRouter(); 
 
   // Load custom fonts for the application
@@ -28,7 +30,65 @@ const LoginScreen = () => {
     'FactoriaMediumItalic': require('../assets/fonts/FactoriaTest-MediumItalic.otf'),
     'FactoriaMedium': require('../assets/fonts/FactoriaTest-Medium.otf'),
     'IntegralCF-Regular': require('../assets/fonts/Fontspring-DEMO-integralcf-regular.otf'),
+    'SupraSans-Regular': require('../assets/fonts/HvDTrial_SupriaSans-Regular-BF64868e7702378.otf'),
+    'SupraSans-HeavyOblique': require('../assets/fonts/HvDTrial_SupriaSans-HeavyOblique-BF64868e75ae1fa.otf'),
   });
+
+  // Animation values
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(50)).current;
+  const formFadeAnim = React.useRef(new Animated.Value(0)).current;
+  const formSlideAnim = React.useRef(new Animated.Value(30)).current;
+  const buttonFadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  // Setup animations
+  useEffect(() => {
+    // Welcome message animation
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+      // Form elements animation
+      Animated.parallel([
+        Animated.timing(formFadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(formSlideAnim, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+
+    // Add effect to handle button animation
+    if (email.length > 0 && password.length > 0) {
+      // Fade in button when both fields have content
+      Animated.timing(buttonFadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Fade out button when either field is empty
+      Animated.timing(buttonFadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [email, password]);
 
   /**
    * Handles the login process, user role verification, and appropriate routing
@@ -36,57 +96,55 @@ const LoginScreen = () => {
    * @function handleLogin
    */
   const handleLogin = async () => {
-    // Form validation
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
     }
-  
+
     try {
-      // Attempt user authentication
-      const response = await fetch('http://10.0.2.2:8000/scoutbase/login', {
+      setIsLoading(true); // Start loading
+
+      const response = await fetch('http://localhost:8000/scoutbase/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to login');
       }
-  
-      // Extract and validate JWT token
+
       const data = await response.json();
       const token = data.jwt;
-  
+
       if (!token) {
         throw new Error('No token found in response');
       }
-  
-      // Decode token to get user information
+
       const decodedToken = jwtDecode(token); 
       const userId = decodedToken.id;
-  
-      // Step 1: Fetch and verify user's role
-      const roleResponse = await fetch(`http://10.0.2.2:8000/scoutbase/fetchrole?user_id=${userId}`);
+      setUserName(decodedToken.name || email.split('@')[0]); // Set user name from token or email
+
+      // Show welcome splash for 2 seconds
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const roleResponse = await fetch(`http://localhost:8000/scoutbase/fetchrole?user_id=${userId}`);
       const roleData = await roleResponse.json();
-  
+
       if (!roleData.role) {
-        // If no role is assigned, redirect to role assignment
         router.push('/roleassignment');
       } else {
-        // Step 2: Fetch user's profile based on their role
         let profileResponse;
         let profileData;
-  
-        // Make appropriate API call based on user role
+
         if (roleData.role === 'Athlete') {
-          profileResponse = await fetch(`http://10.0.2.2:8000/scoutbase/searchforathlete?user_id=${userId}`);
+          profileResponse = await fetch(`http://localhost:8000/scoutbase/searchforathlete?user_id=${userId}`);
         } else if (roleData.role === 'Coach') {
-          profileResponse = await fetch(`http://10.0.2.2:8000/scoutbase/searchforcoach?user_id=${userId}`);
+          profileResponse = await fetch(`http://localhost:8000/scoutbase/searchforcoach?user_id=${userId}`);
         } else if (roleData.role === 'Scout') {
-          profileResponse = await fetch(`http://10.0.2.2:8000/scoutbase/searchforscout?user_id=${userId}`);
+          profileResponse = await fetch(`http://localhost:8000/scoutbase/searchforscout?user_id=${userId}`);
         }
   
         if (!profileResponse.ok) {
@@ -109,17 +167,33 @@ const LoginScreen = () => {
             router.push('/createscout');
           }
         } else {
-          // Profile is complete, proceed to home page
-          Alert.alert('Success', 'Login successful!');
+          // Profile is complete, proceed to home page without alert
           router.push('/home');
         }
       }
     } catch (error) {
+      setIsLoading(false);
       Alert.alert('Error', `Login failed. Please try again. ${error.message}`);
       console.error('Login Error:', error);
     }
   };
   
+  // Add splash screen render
+  if (isLoading) {
+    return (
+      <View style={styles.splashContainer}>
+        <View style={styles.splashContent}>
+          <Text style={styles.splashWelcome}>Welcome back,</Text>
+          <Text style={styles.splashName}>{userName}</Text>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#1f8bde" />
+            <Text style={styles.loadingText}>Logging you in...</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   /**
    * Render the login form interface
    */
@@ -132,25 +206,69 @@ const LoginScreen = () => {
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
       
-      {/* Email input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      {/* Password input field */}
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      {/* Login submit button */}
-      <Button title="Login" style={styles.button} onPress={handleLogin} />
+      {/* Animated Welcome Message */}
+      <Animated.View 
+        style={[
+          styles.welcomeContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }
+        ]}
+      >
+        <Text style={styles.welcomeText}>Welcome Back!</Text>
+        <Text style={styles.welcomeSubtext}>Please sign in to continue</Text>
+      </Animated.View>
+      
+      {/* Animated Form Container */}
+      <Animated.View 
+        style={{
+          width: '100%',
+          opacity: formFadeAnim,
+          transform: [{ translateY: formSlideAnim }],
+        }}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        
+        {/* Animated Login Button */}
+        <Animated.View
+          style={{
+            opacity: buttonFadeAnim,
+            transform: [
+              {
+                translateY: buttonFadeAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              },
+            ],
+          }}
+        >
+          <TouchableOpacity 
+            style={[
+              styles.loginButton,
+              { pointerEvents: email.length > 0 && password.length > 0 ? 'auto' : 'none' }
+            ]} 
+            onPress={handleLogin}
+          >
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
     </View>
   );
 };
@@ -187,7 +305,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     backgroundColor: '#fff',
-    fontFamily: 'FactoriaMedium',
+    fontFamily: 'SupraSans-Regular',
   },
   backButton: {
     position: 'absolute',
@@ -195,9 +313,70 @@ const styles = StyleSheet.create({
     left: 16,
   },
   backButtonText: {
-    fontFamily: 'FactoriaMedium',
+    fontFamily: 'SupraSans-Regular',
     fontSize: 16,
     color: '#1f8bde',
+  },
+  welcomeContainer: {
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontFamily: 'SupraSans-HeavyOblique',
+    fontSize: 32,
+    color: '#1f8bde',
+    marginBottom: 8,
+  },
+  welcomeSubtext: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#666',
+  },
+  loginButton: {
+    backgroundColor: '#1f8bde',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 20,
+    textAlign: 'center',
+    lineHeight: 30,
+  },
+  splashContainer: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  splashContent: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  splashWelcome: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 24,
+    color: '#666',
+    marginBottom: 8,
+  },
+  splashName: {
+    fontFamily: 'SupraSans-HeavyOblique',
+    fontSize: 32,
+    color: '#1f8bde',
+    marginBottom: 30,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  loadingText: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#666',
+    marginTop: 12,
   },
 });
 

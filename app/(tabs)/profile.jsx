@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ActivityIndicator, Alert, StyleSheet, Button } from 'react-native';
+import { View, Text, Image, ActivityIndicator, Alert, StyleSheet, Button, TouchableOpacity, Animated } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 
@@ -23,6 +23,14 @@ const ProfileScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  // Add animation values
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(50)).current;
+  const profileFadeAnim = React.useRef(new Animated.Value(0)).current;
+  const profileSlideAnim = React.useRef(new Animated.Value(30)).current;
+  const infoFadeAnim = React.useRef(new Animated.Value(0)).current;
+  const infoSlideAnim = React.useRef(new Animated.Value(50)).current;
+
   /**
    * Fetches user profile data on component mount
    * Includes token verification, role checking, and profile data retrieval
@@ -34,7 +42,7 @@ const ProfileScreen = () => {
       setIsLoading(true);
       try {
         // Fetch and decode user token
-        const response = await fetch('http://10.0.2.2:8000/scoutbase/user');
+        const response = await fetch('http://localhost:8000/scoutbase/user');
         const token = await response.text();
         const decodedToken = jwtDecode(token);
         const userId = decodedToken?.id;
@@ -42,14 +50,14 @@ const ProfileScreen = () => {
         setUserId(userId);
 
         // Fetch user role
-        const roleResponse = await fetch(`http://10.0.2.2:8000/scoutbase/fetchrole?user_id=${userId}`);
+        const roleResponse = await fetch(`http://localhost:8000/scoutbase/fetchrole?user_id=${userId}`);
         const roleData = await roleResponse.json();
         setRole(roleData.role);
 
         // Fetch profile data based on user role
         const profileEndpoint = roleData.role === 'Athlete'
-          ? `http://10.0.2.2:8000/scoutbase/searchforathlete?user_id=${userId}`
-          : `http://10.0.2.2:8000/scoutbase/searchforcoach?user_id=${userId}`;
+          ? `http://localhost:8000/scoutbase/searchforathlete?user_id=${userId}`
+          : `http://localhost:8000/scoutbase/searchforcoach?user_id=${userId}`;
 
         const profileResponse = await fetch(profileEndpoint);
         const profileData = await profileResponse.json();
@@ -63,6 +71,53 @@ const ProfileScreen = () => {
 
     fetchData();
   }, []);
+
+  // Add animation sequence
+  useEffect(() => {
+    if (!isLoading && profileData) {
+      Animated.sequence([
+        // Welcome text animation
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Profile picture animation
+        Animated.parallel([
+          Animated.timing(profileFadeAnim, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+          Animated.timing(profileSlideAnim, {
+            toValue: 0,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Info container animation
+        Animated.parallel([
+          Animated.timing(infoFadeAnim, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+          Animated.timing(infoSlideAnim, {
+            toValue: 0,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start();
+    }
+  }, [isLoading, profileData]);
 
   /**
    * Handles user logout process
@@ -78,12 +133,15 @@ const ProfileScreen = () => {
     }
   };
 
-  // Display loading spinner while data is being fetched
   if (isLoading) {
-    return <ActivityIndicator size="large" color="#1e90ff" style={styles.loader} />;
+    return (
+      <View style={styles.splashContainer}>
+        <ActivityIndicator size="large" color="#1f8bde" />
+        <Text style={styles.loadingText}>Loading your profile...</Text>
+      </View>
+    );
   }
 
-  // Display error message if profile data fails to load
   if (!profileData) {
     return (
       <View style={styles.container}>
@@ -92,49 +150,110 @@ const ProfileScreen = () => {
     );
   }
 
-  /**
-   * Render the profile interface
-   */
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      
-      {/* Profile Picture Section */}
+      <Animated.View 
+        style={[
+          styles.welcomeContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }
+        ]}
+      >
+        <Text style={styles.welcomeText}>Your Profile</Text>
+        <Text style={styles.welcomeSubtext}>
+          {role === 'Athlete' ? 'Athlete Profile' : 'Coach Profile'}
+        </Text>
+      </Animated.View>
+
       <View style={styles.profileContainer}>
-        {profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
-          <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
-        ) : (
-          <Text style={styles.profilePicture}>{profileData.profile_picture || '👤'}</Text>
-        )}
+        <Animated.View
+          style={{
+            opacity: profileFadeAnim,
+            transform: [{ translateY: profileSlideAnim }],
+          }}
+        >
+          {profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
+            <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.defaultProfileImage}>
+              <Text style={styles.defaultProfileText}>👤</Text>
+            </View>
+          )}
+        </Animated.View>
+
+        <Animated.View
+          style={[
+            styles.infoContainer,
+            {
+              opacity: infoFadeAnim,
+              transform: [{ translateY: infoSlideAnim }],
+              width: '100%',
+            }
+          ]}
+        >
+          {role === 'Athlete' ? (
+            <>
+              <Text style={styles.infoLabel}>High School</Text>
+              <Text style={styles.infoText}>{profileData.high_school_name}</Text>
+              
+              <Text style={styles.infoLabel}>Positions</Text>
+              <Text style={styles.infoText}>{profileData.positions}</Text>
+              
+              <Text style={styles.infoLabel}>Height</Text>
+              <Text style={styles.infoText}>{profileData.height} ft</Text>
+              
+              <Text style={styles.infoLabel}>Weight</Text>
+              <Text style={styles.infoText}>{profileData.weight} lbs</Text>
+              
+              <Text style={styles.infoLabel}>State</Text>
+              <Text style={styles.infoText}>{profileData.state}</Text>
+              
+              <Text style={styles.infoLabel}>Bio</Text>
+              <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.infoLabel}>Team Needs</Text>
+              <Text style={styles.infoText}>{profileData.team_needs}</Text>
+              
+              <Text style={styles.infoLabel}>School Name</Text>
+              <Text style={styles.infoText}>{profileData.school_name}</Text>
+              
+              <Text style={styles.infoLabel}>State</Text>
+              <Text style={styles.infoText}>{profileData.state}</Text>
+              
+              <Text style={styles.infoLabel}>Bio</Text>
+              <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>
+            </>
+          )}
+        </Animated.View>
+
+        <Animated.View
+          style={[
+            styles.buttonContainer,
+            {
+              opacity: infoFadeAnim,
+              transform: [{ translateY: infoSlideAnim }],
+            }
+          ]}
+        >
+          <TouchableOpacity 
+            style={styles.primaryButton}
+            onPress={() => role === 'Athlete' ? router.push('/editathleteprofile') : router.push('/editcoachprofile')}
+          >
+            <Text style={styles.buttonText}>Edit Profile</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.secondaryButton}
+            onPress={handleLogout}
+          >
+            <Text style={styles.buttonText}>Logout</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
-
-      {/* Role-specific Profile Information */}
-      {role === 'Athlete' ? (
-        // Athlete Profile Details
-        <>
-          <Text style={styles.infoText}>High School: {profileData.high_school_name}</Text>
-          <Text style={styles.infoText}>Positions: {profileData.positions}</Text>
-          <Text style={styles.infoText}>Height: {profileData.height} ft</Text>
-          <Text style={styles.infoText}>Weight: {profileData.weight} lbs</Text>
-          <Text style={styles.infoText}>Bio: {profileData.bio || 'N/A'}</Text>
-          <Text style={styles.infoText}>State: {profileData.state}</Text>
-        </>
-      ) : (
-        // Coach Profile Details
-        <>
-          <Text style={styles.infoText}>Team Needs: {profileData.team_needs}</Text>
-          <Text style={styles.infoText}>School Name: {profileData.school_name}</Text>
-          <Text style={styles.infoText}>Bio: {profileData.bio || 'N/A'}</Text>
-          <Text style={styles.infoText}>State: {profileData.state}</Text>
-        </>
-      )}
-
-      {/* Action Buttons */}
-      <Button
-        title="Edit Profile"
-        onPress={() => role === 'Athlete' ? router.push('/editathleteprofile') : router.push('/editcoachprofile')}
-      />
-      <Button title="Logout" onPress={handleLogout} />
     </View>
   );
 };
@@ -144,44 +263,114 @@ const ProfileScreen = () => {
  * Defines the visual appearance of all UI elements
  */
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    padding: 20, 
-    backgroundColor: '#f5f5f5' 
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
   },
-  title: { 
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    marginBottom: 20, 
-    textAlign: 'center' 
+  splashContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
-  loader: { 
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center' 
+  loadingText: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#666',
+    marginTop: 12,
   },
-  profileContainer: { 
-    flexDirection: 'row', 
-    alignItems: 'center' 
+  welcomeContainer: {
+    marginTop: 60,
+    marginBottom: 30,
+    alignItems: 'center',
   },
-  profilePicture: { 
-    fontSize: 40, 
-    marginRight: 12 
+  welcomeText: {
+    fontFamily: 'SupraSans-HeavyOblique',
+    fontSize: 32,
+    color: '#1f8bde',
+    marginBottom: 8,
   },
-  profileImage: { 
-    width: 120, 
-    height: 120, 
-    borderRadius: 60, 
-    marginRight: 12 
+  welcomeSubtext: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#666',
   },
-  infoText: { 
-    fontSize: 16, 
-    marginBottom: 8 
+  profileContainer: {
+    flex: 1,
+    alignItems: 'center',
   },
-  errorText: { 
-    fontSize: 18, 
-    color: 'red', 
-    textAlign: 'center' 
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 24,
+  },
+  defaultProfileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#e1e1e1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  defaultProfileText: {
+    fontSize: 40,
+  },
+  infoContainer: {
+    width: '100%',
+    padding: 16,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  infoLabel: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 14,
+    color: '#666',
+    marginTop: 12,
+  },
+  infoText: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 8,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 12,
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  primaryButton: {
+    backgroundColor: '#1f8bde',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  secondaryButton: {
+    backgroundColor: '#e63946',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontFamily: 'SupraSans-Regular',
+    color: 'white',
+    fontSize: 16,
+  },
+  errorText: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 14,
+    color: '#e63946',
+    textAlign: 'center',
   },
 });
 

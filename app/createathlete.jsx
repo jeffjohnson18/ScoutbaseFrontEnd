@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, Image, Platform } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet, Image, Platform, TouchableOpacity } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -29,6 +29,8 @@ const CreateAthleteProfileScreen = () => {
   const [bio, setBio] = useState('');
   const [state, setState] = useState('');
   const router = useRouter();
+  const [error, setError] = useState('');
+  const [showSplash, setShowSplash] = useState(false);
 
   /**
    * Fetches and decodes user token on component mount
@@ -46,25 +48,26 @@ const CreateAthleteProfileScreen = () => {
    */
   const fetchTokenAndDecode = async () => {
     try {
-      // Fetch user token from backend
-      const response = await fetch('http://10.0.2.2:8000/scoutbase/user', {
+      const response = await fetch('http://localhost:8000/scoutbase/user', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
 
       if (!response.ok) throw new Error('Failed to retrieve token');
 
-      // Decode token and extract user ID
       const token = await response.text();
       const decodedToken = jwtDecode(token);
 
       if (decodedToken?.id) {
         setUserId(decodedToken.id);
+        setError('');
       } else {
         throw new Error('Invalid token format');
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to retrieve or decode token.');
+      setError('Session expired. Please log in again.');
+      setTimeout(() => router.push('/login'), 2000);
     }
   };
 
@@ -74,15 +77,13 @@ const CreateAthleteProfileScreen = () => {
    * @function pickImage
    */
   const pickImage = async () => {
-    // Request permission to access media library
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert('Permission required', 'You need to grant permission to select an image.');
+      setError('Permission to access photos is required');
       return;
     }
 
-    // Launch image picker
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -92,12 +93,9 @@ const CreateAthleteProfileScreen = () => {
 
     if (!pickerResult.canceled) {
       let localUri = pickerResult.assets[0].uri;
-      
-      // Handle iOS file path format
       if (Platform.OS === 'ios') {
         localUri = localUri.replace('file://', '');
       }
-
       setProfilePicture(localUri);
     }
   };
@@ -108,13 +106,11 @@ const CreateAthleteProfileScreen = () => {
    * @function handleCreateProfile
    */
   const handleCreateProfile = async () => {
-    // Validate required fields
     if (!userId || !highSchoolName || !positions || !height || !weight || !bio || !state) {
-      Alert.alert('Error', 'Please fill in all required fields.');
+      setError('Please fill in all required fields');
       return;
     }
 
-    // Prepare form data for profile creation
     const profileData = new FormData();
     profileData.append('user_id', userId);
     profileData.append('high_school_name', highSchoolName);
@@ -125,7 +121,6 @@ const CreateAthleteProfileScreen = () => {
     profileData.append('bio', bio);
     profileData.append('state', state);
 
-    // Append profile picture if selected
     if (profilePicture) {
       const filename = profilePicture.split('/').pop();
       const match = /\.(\w+)$/.exec(filename);
@@ -139,28 +134,31 @@ const CreateAthleteProfileScreen = () => {
     }
 
     try {
-      // Send profile creation request to backend
-      const response = await fetch('http://10.0.2.2:8000/scoutbase/athlete/createprofile', {
+      const response = await fetch('http://localhost:8000/scoutbase/athlete/createprofile', {
         method: 'POST',
         body: profileData,
+        credentials: 'include',
       });
 
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData?.message || 'Failed to create athlete profile.');
+        throw new Error(responseData?.message || 'Failed to create profile');
       }
 
-      // Update uploaded image URL if provided in response
       if (responseData.profile_picture) {
-        setUploadedImageUrl(`http://10.0.2.2:8000${responseData.profile_picture}`);
+        setUploadedImageUrl(`http://localhost:8000${responseData.profile_picture}`);
       }
 
-      Alert.alert('Success', 'Athlete profile created successfully!');
-      router.push('/home');
+      // Show splash screen
+      setShowSplash(true);
+      // Wait 2 seconds then navigate
+      setTimeout(() => {
+        router.push('/profile');
+      }, 2000);
+
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to create profile.');
-      console.error(error);
+      setError(error.message || 'Failed to create profile');
     }
   };
 
@@ -169,77 +167,91 @@ const CreateAthleteProfileScreen = () => {
    */
   return (
     <View style={styles.container}>
-      {/* High School Name input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="High School Name" 
-        value={highSchoolName} 
-        onChangeText={setHighSchoolName} 
-      />
+      {showSplash ? (
+        <View style={styles.splashContainer}>
+          <Text style={styles.splashText}>Profile Created!</Text>
+          <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
+        </View>
+      ) : (
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+      )}
 
-      {/* Positions input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="Positions (e.g., Pitcher, Outfielder)" 
-        value={positions} 
-        onChangeText={setPositions} 
-      />
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.welcomeText}>Create Your Profile</Text>
+        <Text style={styles.welcomeSubtext}>Tell us about yourself</Text>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      </View>
 
-      {/* YouTube Video Link input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="YouTube Video Link (optional)" 
-        value={youtubeVideoLink} 
-        onChangeText={setYoutubeVideoLink} 
-      />
+      <View style={styles.formContainer}>
+        <TextInput 
+          style={styles.input} 
+          placeholder="High School Name" 
+          value={highSchoolName} 
+          onChangeText={setHighSchoolName} 
+        />
 
-      {/* Height input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="Height (e.g., 6.1)" 
-        value={height} 
-        onChangeText={setHeight} 
-        keyboardType="numeric" 
-      />
+        <TextInput 
+          style={styles.input} 
+          placeholder="Positions (e.g., Pitcher, Outfielder)" 
+          value={positions} 
+          onChangeText={setPositions} 
+        />
 
-      {/* Weight input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="Weight (e.g., 180)" 
-        value={weight} 
-        onChangeText={setWeight} 
-        keyboardType="numeric" 
-      />
+        <TextInput 
+          style={styles.input} 
+          placeholder="YouTube Video Link (optional)" 
+          value={youtubeVideoLink} 
+          onChangeText={setYoutubeVideoLink} 
+        />
 
-      {/* Bio input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="Bio" 
-        value={bio} 
-        onChangeText={setBio} 
-        multiline 
-      />
+        <TextInput 
+          style={styles.input} 
+          placeholder="Height (e.g., 6.1)" 
+          value={height} 
+          onChangeText={setHeight} 
+          keyboardType="numeric" 
+        />
 
-      {/* State input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="State" 
-        value={state} 
-        onChangeText={setState} 
-      />
+        <TextInput 
+          style={styles.input} 
+          placeholder="Weight (e.g., 180)" 
+          value={weight} 
+          onChangeText={setWeight} 
+          keyboardType="numeric" 
+        />
 
-      {/* Profile picture preview */}
-      {profilePicture && <Image source={{ uri: profilePicture }} style={styles.profileImage} />}
+        <TextInput 
+          style={styles.input} 
+          placeholder="Bio" 
+          value={bio} 
+          onChangeText={setBio} 
+          multiline 
+        />
 
-      {/* Image selection button */}
-      <Button title="Select Profile Picture" onPress={pickImage} />
-      {profilePicture && <Text>Image Selected: {profilePicture.split('/').pop()}</Text>}
+        <TextInput 
+          style={styles.input} 
+          placeholder="State" 
+          value={state} 
+          onChangeText={setState} 
+        />
 
-      {/* Profile creation button */}
-      <Button title="Create Profile" onPress={handleCreateProfile} />
+        {profilePicture && (
+          <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+        )}
 
-      {/* Uploaded profile picture preview */}
-      {uploadedImageUrl ? <Image source={{ uri: uploadedImageUrl }} style={styles.profileImage} /> : null}
+        <TouchableOpacity style={styles.button} onPress={pickImage}>
+          <Text style={styles.buttonText}>Select Profile Picture</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.primaryButton} onPress={handleCreateProfile}>
+          <Text style={styles.buttonText}>Create Profile</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -251,19 +263,56 @@ const CreateAthleteProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     padding: 16,
     backgroundColor: '#f5f5f5',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 16,
+    zIndex: 1,
+  },
+  backButtonText: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#1f8bde',
+  },
+  welcomeContainer: {
+    marginTop: 100,
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontFamily: 'SupraSans-HeavyOblique',
+    fontSize: 32,
+    color: '#1f8bde',
+    marginBottom: 8,
+  },
+  welcomeSubtext: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#666',
+  },
+  errorText: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 14,
+    color: '#e63946',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  formContainer: {
+    flex: 1,
+    gap: 12,
   },
   input: {
     width: '100%',
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 4,
-    marginBottom: 12,
-    paddingHorizontal: 8,
+    borderRadius: 8,
+    paddingHorizontal: 12,
     backgroundColor: '#fff',
+    fontFamily: 'SupraSans-Regular',
   },
   profileImage: {
     width: 100,
@@ -271,6 +320,42 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignSelf: 'center',
     marginVertical: 10,
+  },
+  button: {
+    backgroundColor: '#495057',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  primaryButton: {
+    backgroundColor: '#1f8bde',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontFamily: 'SupraSans-Regular',
+    color: 'white',
+    fontSize: 16,
+  },
+  splashContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  splashText: {
+    fontFamily: 'SupraSans-HeavyOblique',
+    fontSize: 32,
+    color: '#1f8bde',
+    marginBottom: 16,
+  },
+  splashSubtext: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 18,
+    color: '#666',
   },
 });
 

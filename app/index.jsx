@@ -5,12 +5,11 @@
  */
 
 import React from 'react';
-import { Text, View, Dimensions } from 'react-native';
+import { Text, View, Dimensions, Image, Animated } from 'react-native';
 import { Link } from 'expo-router';
 import { useFonts } from 'expo-font';
 
-// Get device window width for responsive layouts
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 /**
  * Home Component
@@ -18,6 +17,18 @@ const { width } = Dimensions.get('window');
  * @component
  */
 export default function Home() {
+  // Add fade-in animation value
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  // Start fade-in animation on component mount
+  React.useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1500,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
   // Load custom fonts for the application
   const [fontsLoaded] = useFonts({
     'FactoriaBoldItalic': require('../assets/fonts/FactoriaTest-BoldItalic.otf'),
@@ -25,26 +36,49 @@ export default function Home() {
     'FactoriaMedium': require('../assets/fonts/FactoriaTest-Medium.otf'),
     'IntegralCF-Regular': require('../assets/fonts/Fontspring-DEMO-integralcf-regular.otf'),
     'SupraSans-Regular': require('../assets/fonts/HvDTrial_SupriaSans-Regular-BF64868e7702378.otf'),
-    'SupraSans-HeavyOblique': require('../assets/fonts/HvDTrial_SupriaSans-HeavyOblique-BF64868e7702378.otf'),
-
+    'SupraSans-HeavyOblique': require('../assets/fonts/HvDTrial_SupriaSans-HeavyOblique-BF64868e75ae1fa.otf'),
   });
 
-  /**
-   * Render the home screen interface
-   */
   return (
     <View
       style={{
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        marginTop: 100,
+        justifyContent: 'center',
+        paddingBottom: height * 0.2,
       }}
     >
-      {/* Application Logo */}
-      <Text style={{ fontSize: 25, fontFamily: 'IntegralCF-Regular', lineHeight: 40 }}>
-        <Text style={{ color: 'black' }}>Scout</Text>
-        <Text style={{ color: '#1f8bde' }}>base</Text>
+      {/* Logo Image */}
+      <Image
+        source={require('../assets/images/ScoutBase.png')}
+        style={{
+          width: width * 0.4,
+          height: width * 0.4,
+          marginBottom: 10, // Reduced from 20 to 10
+          resizeMode: 'contain',
+        }}
+      />
+
+      {/* Welcome Text with Animation */}
+      <Animated.Text style={{
+        opacity: fadeAnim,
+        fontSize: 16,
+        fontFamily: 'SupraSans-Regular',
+        color: '#666',
+        marginBottom: 5, // Small space between "welcome to" and "SCOUTBASE"
+      }}>
+        WELCOME TO
+      </Animated.Text>
+
+      {/* Application Text */}
+      <Text style={{ 
+        fontSize: 35, 
+        fontFamily: 'SupraSans-HeavyOblique', 
+        lineHeight: 40,
+        marginBottom: 25,
+      }}>
+        <Text style={{ color: 'black' }}>SCOUT</Text>
+        <Text style={{ color: '#1f8bde' }}>BASE</Text>
       </Text>
 
       {/* Register Button - Primary */}
@@ -55,14 +89,13 @@ export default function Home() {
           paddingHorizontal: 20,
           width: width * 0.75,
           alignSelf: 'center',
-          marginTop: 50,
         }}
       >
         <Link 
           href="/register" 
           style={{ 
             color: 'white', 
-            fontFamily: 'FactoriaMediumItalic', 
+            fontFamily: 'SupraSans-Regular',
             fontSize: 20, 
             textAlign: 'center', 
             lineHeight: 30 
@@ -78,12 +111,12 @@ export default function Home() {
           href="/login" 
           style={{ 
             color: '#666', 
-            fontFamily: 'FactoriaMedium', 
-            fontSize: 16, 
+            fontFamily: 'SupraSans-Regular',
+            fontSize: 14, 
             textAlign: 'center' 
           }}
         >
-          Already have an account? Login
+          Have an account? Login 
         </Link>
       </View>
     </View>

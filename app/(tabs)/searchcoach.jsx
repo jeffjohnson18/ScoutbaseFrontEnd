@@ -4,8 +4,8 @@
  * @module SearchCoachScreen
  */
 
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity } from 'react-native';
 
 /**
  * SearchCoachScreen Component
@@ -21,6 +21,54 @@ const SearchCoachScreen = () => {
   const [bio, setBio] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Animation values
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(50)).current;
+  const formFadeAnim = React.useRef(new Animated.Value(0)).current;
+  const formSlideAnim = React.useRef(new Animated.Value(30)).current;
+  const resultsFadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  // Add animation sequence
+  useEffect(() => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(formFadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(formSlideAnim, {
+          toValue: 0,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, []);
+
+  // Add animation for results
+  useEffect(() => {
+    if (results.length > 0) {
+      Animated.timing(resultsFadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [results]);
 
   /**
    * Handles the coach search process
@@ -90,49 +138,76 @@ const SearchCoachScreen = () => {
    */
   return (
     <View style={styles.container}>
-      {/* Search filters */}
-      <TextInput
-        style={styles.input}
-        placeholder="Team Needs"
-        value={teamNeeds}
-        onChangeText={setTeamNeeds}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="School Name"
-        value={schoolName}
-        onChangeText={setSchoolName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Position"
-        value={position}
-        onChangeText={setPosition}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Bio"
-        value={bio}
-        onChangeText={setBio}
-      />
-      
-      {/* Search button */}
-      <Button 
-        title={isLoading ? 'Searching...' : 'Search'} 
-        onPress={handleSearch} 
-        disabled={isLoading} 
-      />
+      <Animated.View 
+        style={[
+          styles.welcomeContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }
+        ]}
+      >
+        <Text style={styles.welcomeText}>Search Coaches</Text>
+        <Text style={styles.welcomeSubtext}>Find coaching opportunities</Text>
+      </Animated.View>
 
-      {/* Results list */}
-      <FlatList
-        data={results}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.resultsContainer}
-        ListEmptyComponent={
-          !isLoading && <Text style={styles.noResults}>No coaches found matching the criteria</Text>
-        }
-      />
+      <Animated.View
+        style={{
+          opacity: formFadeAnim,
+          transform: [{ translateY: formSlideAnim }],
+        }}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder="Team Needs"
+          value={teamNeeds}
+          onChangeText={setTeamNeeds}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="School Name"
+          value={schoolName}
+          onChangeText={setSchoolName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Position"
+          value={position}
+          onChangeText={setPosition}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Bio"
+          value={bio}
+          onChangeText={setBio}
+        />
+
+        <TouchableOpacity 
+          style={styles.primaryButton}
+          onPress={handleSearch}
+          disabled={isLoading}
+        >
+          <Text style={styles.buttonText}>
+            {isLoading ? 'Searching...' : 'Search'}
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      <Animated.View style={{ opacity: resultsFadeAnim }}>
+        <FlatList
+          data={results}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={styles.resultsContainer}
+          ListEmptyComponent={
+            !isLoading && (
+              <Text style={styles.noResults}>
+                No coaches found matching the criteria
+              </Text>
+            )
+          }
+        />
+      </Animated.View>
     </View>
   );
 };
@@ -142,57 +217,91 @@ const SearchCoachScreen = () => {
  * Defines the visual appearance of all UI elements
  */
 const styles = StyleSheet.create({
-  profileContainer: {
-    flexDirection: 'row',  
-    alignItems: 'center',  
-  },
-  profilePicture: {
-    fontSize: 40,          
-    marginRight: 12,       
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-  },
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: '#f5f5f5',
   },
+  welcomeContainer: {
+    marginTop: 60,
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontFamily: 'SupraSans-HeavyOblique',
+    fontSize: 32,
+    color: '#1f8bde',
+    marginBottom: 8,
+  },
+  welcomeSubtext: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#666',
+  },
   input: {
+    width: '100%',
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: 8,
     marginBottom: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     backgroundColor: '#fff',
+    fontFamily: 'SupraSans-Regular',
+  },
+  primaryButton: {
+    backgroundColor: '#1f8bde',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  buttonText: {
+    fontFamily: 'SupraSans-Regular',
+    color: 'white',
+    fontSize: 16,
   },
   resultsContainer: {
     marginTop: 16,
   },
   resultCard: {
-    padding: 12,
-    borderRadius: 4,
+    padding: 16,
+    borderRadius: 12,
     backgroundColor: '#fff',
     marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
   },
+  profileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 16,
+  },
+  profilePicture: {
+    fontSize: 40,
+    marginRight: 16,
+  },
   resultText: {
+    fontFamily: 'SupraSans-Regular',
     fontSize: 14,
-    marginBottom: 4,
+    marginBottom: 6,
+    color: '#333',
   },
   noResults: {
-    marginTop: 16,
+    fontFamily: 'SupraSans-Regular',
     fontSize: 16,
     textAlign: 'center',
-    color: '#999',
+    color: '#666',
+    marginTop: 20,
   },
 });
 
