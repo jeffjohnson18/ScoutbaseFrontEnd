@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
  * and API integration for account creation.
  * @component
  */
+
 const RegistrationScreen = () => {
   // State management for form inputs
   const [name, setName] = useState('');
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    height: 48,
+    height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 4,

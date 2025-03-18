@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, Alert, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, Alert, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 
@@ -40,7 +40,7 @@ const EditAthleteProfile = () => {
     const fetchData = async () => {
       try {
         // Fetch and decode user token to get ID
-        const response = await fetch('http://10.0.2.2:8000/scoutbase/user');
+        const response = await fetch('http://localhost:8000/scoutbase/user');
         const token = await response.text();
         const decodedToken = jwtDecode(token);
         const userId = decodedToken?.id;
@@ -48,7 +48,7 @@ const EditAthleteProfile = () => {
         setUserId(userId);
 
         // Fetch athlete profile data
-        const profileResponse = await fetch(`http://10.0.2.2:8000/scoutbase/searchforathlete?user_id=${userId}`);
+        const profileResponse = await fetch(`http://localhost:8000/scoutbase/searchforathlete?user_id=${userId}`);
         const profile = await profileResponse.json();
         
         // Populate form with existing data if available
@@ -96,7 +96,7 @@ const EditAthleteProfile = () => {
       console.log("Edit Profile Request:", JSON.stringify(requestBody, null, 2));
   
       // Send update request to backend
-      const response = await fetch(`http://10.0.2.2:8000/scoutbase/editathlete/${userId}/`, {
+      const response = await fetch(`http://localhost:8000/scoutbase/editathlete/${userId}/`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
@@ -123,72 +123,88 @@ const EditAthleteProfile = () => {
    * Render the profile edit form interface
    */
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Edit Profile</Text>
+    <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.welcomeContainer}>
+          <Text style={styles.welcomeText}>Edit Profile</Text>
+          <Text style={styles.welcomeSubtext}>Update Your Information</Text>
+        </View>
 
-      {/* High School Name input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="High School Name"
-        value={profileData.high_school_name}
-        onChangeText={(text) => setProfileData({ ...profileData, high_school_name: text })}
-      />
+        <View style={styles.formContainer}>
+          <TextInput 
+            style={styles.input} 
+            placeholder="High School Name"
+            value={profileData.high_school_name}
+            onChangeText={(text) => setProfileData({ ...profileData, high_school_name: text })}
+          />
 
-      {/* Positions input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="Positions"
-        value={profileData.positions}
-        onChangeText={(text) => setProfileData({ ...profileData, positions: text })}
-      />
+          <TextInput 
+            style={styles.input} 
+            placeholder="Positions"
+            value={profileData.positions}
+            onChangeText={(text) => setProfileData({ ...profileData, positions: text })}
+          />
 
-      {/* YouTube Video Link input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="YouTube Video Link"
-        value={profileData.youtube_video_link}
-        onChangeText={(text) => setProfileData({ ...profileData, youtube_video_link: text })}
-      />
+          <TextInput 
+            style={styles.input} 
+            placeholder="YouTube Video Link"
+            value={profileData.youtube_video_link}
+            onChangeText={(text) => setProfileData({ ...profileData, youtube_video_link: text })}
+          />
 
-      {/* Height input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="Height (ft)"
-        keyboardType="numeric"
-        value={profileData.height}
-        onChangeText={(text) => setProfileData({ ...profileData, height: text })}
-      />
+          <TextInput 
+            style={styles.input} 
+            placeholder="Height (ft)"
+            keyboardType="numeric"
+            value={profileData.height}
+            onChangeText={(text) => setProfileData({ ...profileData, height: text })}
+          />
 
-      {/* Weight input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="Weight (lbs)"
-        keyboardType="numeric"
-        value={profileData.weight}
-        onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
-      />
+          <TextInput 
+            style={styles.input} 
+            placeholder="Weight (lbs)"
+            keyboardType="numeric"
+            value={profileData.weight}
+            onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
+          />
 
-      {/* Bio input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="Bio"
-        multiline
-        value={profileData.bio}
-        onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
-      />
+          <TextInput 
+            style={styles.input} 
+            placeholder="Bio"
+            multiline
+            value={profileData.bio}
+            onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
+          />
 
-      {/* State input field */}
-      <TextInput 
-        style={styles.input} 
-        placeholder="State"
-        value={profileData.state}
-        onChangeText={(text) => setProfileData({ ...profileData, state: text })}
-      />
+          <TextInput 
+            style={styles.input} 
+            placeholder="State"
+            value={profileData.state}
+            onChangeText={(text) => setProfileData({ ...profileData, state: text })}
+          />
 
-      {/* Action buttons */}
-      <Button title="Save Changes" onPress={handleSave} />
-      <Button title="Cancel" color="red" onPress={() => router.push('/profile')} />
-    </ScrollView>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={styles.primaryButton}
+              onPress={handleSave}
+            >
+              <Text style={styles.buttonText}>Save Changes</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.secondaryButton}
+              onPress={() => router.push('/profile')}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -197,29 +213,78 @@ const EditAthleteProfile = () => {
  * Defines the visual appearance of all UI elements
  */
 const styles = StyleSheet.create({
-  container: { 
-    flexGrow: 1, 
-    padding: 20, 
-    backgroundColor: '#f5f5f5' 
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  title: { 
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    marginBottom: 20, 
-    textAlign: 'center' 
+  scrollContainer: {
+    flex: 1,
+    width: '100%',
   },
-  input: { 
-    backgroundColor: '#fff', 
-    padding: 10, 
-    marginBottom: 10, 
-    borderRadius: 5, 
-    borderWidth: 1, 
-    borderColor: '#ccc' 
+  scrollContentContainer: {
+    flexGrow: 1,
+    paddingBottom: 24,
   },
-  loader: { 
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center' 
+  welcomeContainer: {
+    marginTop: 60,
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontFamily: 'SupraSans-HeavyOblique',
+    fontSize: 32,
+    color: '#1f8bde',
+    marginBottom: 8,
+  },
+  welcomeSubtext: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#666',
+  },
+  formContainer: {
+    padding: 16,
+  },
+  input: {
+    width: '100%',
+    height: 48,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 12,
+    marginTop: 24,
+  },
+  primaryButton: {
+    backgroundColor: '#1f8bde',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  secondaryButton: {
+    backgroundColor: '#e63946',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontFamily: 'SupraSans-Regular',
+    color: 'white',
+    fontSize: 16,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
 });
 

@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ActivityIndicator, Alert, StyleSheet, Button, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, Image, ActivityIndicator, Alert, StyleSheet, Button, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 
@@ -126,7 +126,7 @@ const ProfileScreen = () => {
    */
   const handleLogout = async () => {
     try {
-      await fetch('http://10.0.2.2:8000/scoutbase/logout', { method: 'POST' });
+      await fetch('http://localhost:8000/scoutbase/logout', { method: 'POST' });
       router.replace('/');
     } catch (error) {
       Alert.alert('Error', 'Failed to logout. Please try again.');
@@ -152,108 +152,114 @@ const ProfileScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Animated.View 
-        style={[
-          styles.welcomeContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-          }
-        ]}
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContentContainer}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.welcomeText}>Your Profile</Text>
-        <Text style={styles.welcomeSubtext}>
-          {role === 'Athlete' ? 'Athlete Profile' : 'Coach Profile'}
-        </Text>
-      </Animated.View>
-
-      <View style={styles.profileContainer}>
-        <Animated.View
-          style={{
-            opacity: profileFadeAnim,
-            transform: [{ translateY: profileSlideAnim }],
-          }}
-        >
-          {profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
-            <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
-          ) : (
-            <View style={styles.defaultProfileImage}>
-              <Text style={styles.defaultProfileText}>👤</Text>
-            </View>
-          )}
-        </Animated.View>
-
-        <Animated.View
+        <Animated.View 
           style={[
-            styles.infoContainer,
+            styles.welcomeContainer,
             {
-              opacity: infoFadeAnim,
-              transform: [{ translateY: infoSlideAnim }],
-              width: '100%',
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
             }
           ]}
         >
-          {role === 'Athlete' ? (
-            <>
-              <Text style={styles.infoLabel}>High School</Text>
-              <Text style={styles.infoText}>{profileData.high_school_name}</Text>
-              
-              <Text style={styles.infoLabel}>Positions</Text>
-              <Text style={styles.infoText}>{profileData.positions}</Text>
-              
-              <Text style={styles.infoLabel}>Height</Text>
-              <Text style={styles.infoText}>{profileData.height} ft</Text>
-              
-              <Text style={styles.infoLabel}>Weight</Text>
-              <Text style={styles.infoText}>{profileData.weight} lbs</Text>
-              
-              <Text style={styles.infoLabel}>State</Text>
-              <Text style={styles.infoText}>{profileData.state}</Text>
-              
-              <Text style={styles.infoLabel}>Bio</Text>
-              <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.infoLabel}>Team Needs</Text>
-              <Text style={styles.infoText}>{profileData.team_needs}</Text>
-              
-              <Text style={styles.infoLabel}>School Name</Text>
-              <Text style={styles.infoText}>{profileData.school_name}</Text>
-              
-              <Text style={styles.infoLabel}>State</Text>
-              <Text style={styles.infoText}>{profileData.state}</Text>
-              
-              <Text style={styles.infoLabel}>Bio</Text>
-              <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>
-            </>
-          )}
+          <Text style={styles.welcomeText}>Your Profile</Text>
+          <Text style={styles.welcomeSubtext}>
+            {role === 'Athlete' ? 'Athlete Profile' : 'Coach Profile'}
+          </Text>
         </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.buttonContainer,
-            {
-              opacity: infoFadeAnim,
-              transform: [{ translateY: infoSlideAnim }],
-            }
-          ]}
-        >
-          <TouchableOpacity 
-            style={styles.primaryButton}
-            onPress={() => role === 'Athlete' ? router.push('/editathleteprofile') : router.push('/editcoachprofile')}
+        <View style={styles.profileContainer}>
+          <Animated.View
+            style={{
+              opacity: profileFadeAnim,
+              transform: [{ translateY: profileSlideAnim }],
+            }}
           >
-            <Text style={styles.buttonText}>Edit Profile</Text>
-          </TouchableOpacity>
+            {profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
+              <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+            ) : (
+              <View style={styles.defaultProfileImage}>
+                <Text style={styles.defaultProfileText}>👤</Text>
+              </View>
+            )}
+          </Animated.View>
 
-          <TouchableOpacity 
-            style={styles.secondaryButton}
-            onPress={handleLogout}
+          <Animated.View
+            style={[
+              styles.infoContainer,
+              {
+                opacity: infoFadeAnim,
+                transform: [{ translateY: infoSlideAnim }],
+                width: '100%',
+              }
+            ]}
           >
-            <Text style={styles.buttonText}>Logout</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+            {role === 'Athlete' ? (
+              <>
+                <Text style={styles.infoLabel}>High School</Text>
+                <Text style={styles.infoText}>{profileData.high_school_name}</Text>
+                
+                <Text style={styles.infoLabel}>Positions</Text>
+                <Text style={styles.infoText}>{profileData.positions}</Text>
+                
+                <Text style={styles.infoLabel}>Height</Text>
+                <Text style={styles.infoText}>{profileData.height} ft</Text>
+                
+                <Text style={styles.infoLabel}>Weight</Text>
+                <Text style={styles.infoText}>{profileData.weight} lbs</Text>
+                
+                <Text style={styles.infoLabel}>State</Text>
+                <Text style={styles.infoText}>{profileData.state}</Text>
+                
+                <Text style={styles.infoLabel}>Bio</Text>
+                <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.infoLabel}>Team Needs</Text>
+                <Text style={styles.infoText}>{profileData.team_needs}</Text>
+                
+                <Text style={styles.infoLabel}>School Name</Text>
+                <Text style={styles.infoText}>{profileData.school_name}</Text>
+                
+                <Text style={styles.infoLabel}>State</Text>
+                <Text style={styles.infoText}>{profileData.state}</Text>
+                
+                <Text style={styles.infoLabel}>Bio</Text>
+                <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>
+              </>
+            )}
+          </Animated.View>
+
+          <Animated.View
+            style={[
+              styles.buttonContainer,
+              {
+                opacity: infoFadeAnim,
+                transform: [{ translateY: infoSlideAnim }],
+              }
+            ]}
+          >
+            <TouchableOpacity 
+              style={styles.primaryButton}
+              onPress={() => role === 'Athlete' ? router.push('/editathleteprofile') : router.push('/editcoachprofile')}
+            >
+              <Text style={styles.buttonText}>Edit Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.secondaryButton}
+              onPress={handleLogout}
+            >
+              <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -265,7 +271,6 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#f5f5f5',
   },
   splashContainer: {
@@ -297,8 +302,8 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   profileContainer: {
-    flex: 1,
     alignItems: 'center',
+    paddingHorizontal: 16,
   },
   profileImage: {
     width: 120,
