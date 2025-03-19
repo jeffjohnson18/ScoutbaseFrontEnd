@@ -22,6 +22,8 @@ const SearchAthleteScreen = () => {
   const [weight, setWeight] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [throwing_arm, setThrowingArm] = useState('');
+  const [batting_arm, setBattingArm] = useState('');
 
   // Add animation values
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -131,6 +133,8 @@ const SearchAthleteScreen = () => {
           <Text style={styles.resultText}>Height: {item.height} inches</Text>
           <Text style={styles.resultText}>Weight: {item.weight} lbs</Text>
           <Text style={styles.resultText}>Bio: {item.bio}</Text>
+          <Text style={styles.resultText}>Throwing Arm: {item.throwing_arm}</Text>
+          <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
         </View>
       </View>
     </View>
@@ -192,7 +196,21 @@ const SearchAthleteScreen = () => {
           value={bio}
           onChangeText={setBio}
         />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Throwing Arm"
+          value={throwing_arm}
+          onChangeText={setThrowingArm}
+        />
 
+        <TextInput
+          style={styles.input}
+          placeholder="Batting Arm"
+          value={batting_arm}
+          onChangeText={setBattingArm}
+        />
+        
         <TouchableOpacity 
           style={styles.primaryButton}
           onPress={handleSearch}

@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, Image, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet, Image, Platform, TouchableOpacity, ScrollView } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -28,6 +28,8 @@ const CreateAthleteProfileScreen = () => {
   const [weight, setWeight] = useState('');
   const [bio, setBio] = useState('');
   const [state, setState] = useState('');
+  const [throwing_arm, setThrowingArm] = useState('');
+  const [batting_arm, setBattingArm] = useState('');
   const router = useRouter();
   const [error, setError] = useState('');
   const [showSplash, setShowSplash] = useState(false);
@@ -106,7 +108,7 @@ const CreateAthleteProfileScreen = () => {
    * @function handleCreateProfile
    */
   const handleCreateProfile = async () => {
-    if (!userId || !highSchoolName || !positions || !height || !weight || !bio || !state) {
+    if (!userId || !highSchoolName || !positions || !height || !weight || !bio || !state || !throwing_arm || !batting_arm) {
       setError('Please fill in all required fields');
       return;
     }
@@ -120,6 +122,8 @@ const CreateAthleteProfileScreen = () => {
     profileData.append('weight', parseFloat(weight));
     profileData.append('bio', bio);
     profileData.append('state', state);
+    profileData.append('throwing_arm', throwing_arm);
+    profileData.append('batting_arm', batting_arm);
 
     if (profilePicture) {
       const filename = profilePicture.split('/').pop();
@@ -166,6 +170,7 @@ const CreateAthleteProfileScreen = () => {
    * Render the profile creation form interface
    */
   return (
+    <ScrollView>
     <View style={styles.container}>
       {showSplash ? (
         <View style={styles.splashContainer}>
@@ -240,6 +245,21 @@ const CreateAthleteProfileScreen = () => {
           onChangeText={setState} 
         />
 
+        <TextInput 
+          style={styles.input} 
+          placeholder="Throwing Arm" 
+          value={throwing_arm} 
+          onChangeText={setThrowingArm} 
+        />
+
+        <TextInput 
+          style={styles.input} 
+          placeholder="Batting Arm" 
+          value={batting_arm} 
+          onChangeText={setBattingArm} 
+        />
+        
+
         {profilePicture && (
           <Image source={{ uri: profilePicture }} style={styles.profileImage} />
         )}
@@ -253,6 +273,7 @@ const CreateAthleteProfileScreen = () => {
         </TouchableOpacity>
       </View>
     </View>
+    </ScrollView>
   );
 };
 

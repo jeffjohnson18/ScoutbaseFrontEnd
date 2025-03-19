@@ -27,6 +27,8 @@ const EditAthleteProfile = () => {
     weight: '',
     bio: '',
     state: '',
+    throwing_arm: '',
+    batting_arm: ''
   });
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -62,6 +64,8 @@ const EditAthleteProfile = () => {
             weight: profile[0]?.weight ? profile[0].weight.toString() : '',
             bio: profile[0]?.bio || '',
             state: profile[0]?.state || '',
+            throwing_arm: profile[0]?.throwing_arm || '',
+            batting_arm: profile[0]?.batting_arm || '',
           });
         }
       } catch (error) {
@@ -91,6 +95,8 @@ const EditAthleteProfile = () => {
         weight: profileData.weight ? parseFloat(profileData.weight) : null,
         bio: profileData.bio || null,
         state: profileData.state || null,
+        throwing_arm: profileData.throwing_arm || null,
+        batting_arm: profileData.batting_arm || null,
       };
   
       console.log("Edit Profile Request:", JSON.stringify(requestBody, null, 2));
@@ -181,11 +187,25 @@ const EditAthleteProfile = () => {
           />
 
           <TextInput 
-            style={styles.input} 
-            placeholder="State"
-            value={profileData.state}
-            onChangeText={(text) => setProfileData({ ...profileData, state: text })}
-          />
+              style={styles.input} 
+              placeholder="State"
+              value={profileData.state}
+              onChangeText={(text) => setProfileData({ ...profileData, state: text })}
+            />
+
+            <TextInput 
+              style={styles.input} 
+              placeholder="Throwing Arm"
+              value={profileData.throwing_arm}
+              onChangeText={(text) => setProfileData({ ...profileData, throwing_arm: text })}
+            />
+
+            <TextInput 
+              style={styles.input} 
+              placeholder="Batting Arm"
+              value={profileData.batting_arm}
+              onChangeText={(text) => setProfileData({ ...profileData, batting_arm: text })}
+            />
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
