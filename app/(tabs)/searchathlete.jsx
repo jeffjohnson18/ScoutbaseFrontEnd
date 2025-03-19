@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the message box icon
 
 /**
  * SearchAthleteScreen Component
@@ -24,6 +25,9 @@ const SearchAthleteScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [throwing_arm, setThrowingArm] = useState('');
   const [batting_arm, setBattingArm] = useState('');
+  const [filtersVisible, setFiltersVisible] = useState(true);
+  const [email, setEmail] = useState(''); // State for email
+  const [userId, setUserId] = useState(null); // Assume you have a way to set the user ID
 
   // Add animation values
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -31,6 +35,26 @@ const SearchAthleteScreen = () => {
   const formFadeAnim = React.useRef(new Animated.Value(0)).current;
   const formSlideAnim = React.useRef(new Animated.Value(30)).current;
   const resultsFadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  // Fetch email function
+  const fetchEmail = async () => {
+    if (userId) {
+      try {
+        const response = await fetch(`http://localhost:8000/scoutbase/fetch-email/${userId}/`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch email');
+        }
+        const data = await response.json();
+        setEmail(data.email); // Assuming the response contains an email field
+      } catch (error) {
+        Alert.alert('Error', `Could not fetch email: ${error.message}`);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchEmail(); // Fetch email when the component mounts
+  }, [userId]);
 
   // Add animation sequence
   useEffect(() => {
@@ -104,6 +128,7 @@ const SearchAthleteScreen = () => {
 
       const data = await response.json();
       setResults(data);
+      setFiltersVisible(false);
     } catch (error) {
       Alert.alert('Error', `Search failed. Please try again. ${error.message}`);
       console.error('Search Error:', error);
@@ -136,6 +161,9 @@ const SearchAthleteScreen = () => {
           <Text style={styles.resultText}>Throwing Arm: {item.throwing_arm}</Text>
           <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
         </View>
+        <TouchableOpacity onPress={() => Alert.alert('Email', email)}>
+          <Ionicons name="mail" size={24} color="#1f8bde" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -155,72 +183,87 @@ const SearchAthleteScreen = () => {
         ]}
       >
         <Text style={styles.welcomeText}>Search Athletes</Text>
-        <Text style={styles.welcomeSubtext}>Find talented players</Text>
+        <Text style={[styles.welcomeSubtext, { 
+          fontSize: 14,
+          textAlign: 'center',
+          paddingHorizontal: 20,
+        }]}>
+          Connect with managers, coaches, and staff that meet your criteria.
+        </Text>
+        
       </Animated.View>
 
-      <Animated.View
-        style={{
-          opacity: formFadeAnim,
-          transform: [{ translateY: formSlideAnim }],
-        }}
-      >
-        <TextInput
-          style={styles.input}
-          placeholder="High School"
-          value={highSchool}
-          onChangeText={setHighSchool}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Positions"
-          value={positions}
-          onChangeText={setPositions}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Height (in inches)"
-          value={height}
-          onChangeText={setHeight}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Weight (in lbs)"
-          value={weight}
-          onChangeText={setWeight}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Bio"
-          value={bio}
-          onChangeText={setBio}
-        />
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Throwing Arm"
-          value={throwing_arm}
-          onChangeText={setThrowingArm}
-        />
+      <TouchableOpacity onPress={() => setFiltersVisible(!filtersVisible)}>
+        <Text style={styles.toggleButton}>
+          {filtersVisible ? 'Hide Filters' : 'Show Filters'}
+        </Text>
+      </TouchableOpacity>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Batting Arm"
-          value={batting_arm}
-          onChangeText={setBattingArm}
-        />
-        
-        <TouchableOpacity 
-          style={styles.primaryButton}
-          onPress={handleSearch}
-          disabled={isLoading}
+      {filtersVisible && (
+        <Animated.View
+          style={{
+            opacity: formFadeAnim,
+            transform: [{ translateY: formSlideAnim }],
+          }}
         >
-          <Text style={styles.buttonText}>
-            {isLoading ? 'Searching...' : 'Search'}
-          </Text>
-        </TouchableOpacity>
-      </Animated.View>
+          <TextInput
+            style={styles.input}
+            placeholder="High School"
+            value={highSchool}
+            onChangeText={setHighSchool}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Positions"
+            value={positions}
+            onChangeText={setPositions}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Height (in inches)"
+            value={height}
+            onChangeText={setHeight}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Weight (in lbs)"
+            value={weight}
+            onChangeText={setWeight}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Bio"
+            value={bio}
+            onChangeText={setBio}
+          />
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Throwing Arm"
+            value={throwing_arm}
+            onChangeText={setThrowingArm}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Batting Arm"
+            value={batting_arm}
+            onChangeText={setBattingArm}
+          />
+          
+          <TouchableOpacity 
+            style={styles.primaryButton}
+            onPress={handleSearch}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isLoading ? 'Searching...' : 'Search'}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 
       <Animated.View style={{ opacity: resultsFadeAnim }}>
         <FlatList
@@ -331,6 +374,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#666',
     marginTop: 20,
+  },
+  toggleButton: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#1f8bde',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 

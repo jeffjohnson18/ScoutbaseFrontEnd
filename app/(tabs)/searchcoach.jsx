@@ -21,6 +21,7 @@ const SearchCoachScreen = () => {
   const [bio, setBio] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [filtersVisible, setFiltersVisible] = useState(true); // Default to true
 
   // Animation values
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -100,6 +101,7 @@ const SearchCoachScreen = () => {
 
       const data = await response.json();
       setResults(data);
+      setFiltersVisible(false); // Hide filters after search
     } catch (error) {
       Alert.alert('Error', `Search failed. Please try again. ${error.message}`);
       console.error('Search Error:', error);
@@ -148,50 +150,64 @@ const SearchCoachScreen = () => {
         ]}
       >
         <Text style={styles.welcomeText}>Search Coaches</Text>
-        <Text style={styles.welcomeSubtext}>Find coaching opportunities</Text>
+        <Text style={[styles.welcomeSubtext, { 
+          fontSize: 14,
+          textAlign: 'center',
+          paddingHorizontal: 20,
+        }]}>
+          Connect with managers, coaches, and staff that meet your criteria.
+        </Text>
       </Animated.View>
 
-      <Animated.View
-        style={{
-          opacity: formFadeAnim,
-          transform: [{ translateY: formSlideAnim }],
-        }}
-      >
-        <TextInput
-          style={styles.input}
-          placeholder="Team Needs"
-          value={teamNeeds}
-          onChangeText={setTeamNeeds}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="School Name"
-          value={schoolName}
-          onChangeText={setSchoolName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Position"
-          value={position}
-          onChangeText={setPosition}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Bio"
-          value={bio}
-          onChangeText={setBio}
-        />
+      <TouchableOpacity onPress={() => setFiltersVisible(!filtersVisible)}>
+        <Text style={styles.toggleButton}>
+          {filtersVisible ? 'Hide Filters' : 'Show Filters'}
+        </Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.primaryButton}
-          onPress={handleSearch}
-          disabled={isLoading}
+      {filtersVisible && (
+        <Animated.View
+          style={{
+            opacity: formFadeAnim,
+            transform: [{ translateY: formSlideAnim }],
+          }}
         >
-          <Text style={styles.buttonText}>
-            {isLoading ? 'Searching...' : 'Search'}
-          </Text>
-        </TouchableOpacity>
-      </Animated.View>
+          <TextInput
+            style={styles.input}
+            placeholder="Team Needs"
+            value={teamNeeds}
+            onChangeText={setTeamNeeds}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="School Name"
+            value={schoolName}
+            onChangeText={setSchoolName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Position"
+            value={position}
+            onChangeText={setPosition}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Bio"
+            value={bio}
+            onChangeText={setBio}
+          />
+
+          <TouchableOpacity 
+            style={styles.primaryButton}
+            onPress={handleSearch}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isLoading ? 'Searching...' : 'Search'}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 
       <Animated.View style={{ opacity: resultsFadeAnim }}>
         <FlatList
@@ -302,6 +318,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#666',
     marginTop: 20,
+  },
+  toggleButton: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#1f8bde',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 
