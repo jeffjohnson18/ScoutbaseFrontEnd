@@ -5,9 +5,17 @@ import { jwtDecode } from 'jwt-decode';
 import { useFonts } from 'expo-font';
 
 /**
- * RoleAssignmentScreen Component
+ * Role Assignment Screen Component
  * Handles the role selection and assignment process for new users.
- * Allows users to choose between Athlete, Coach, or Scout roles.
+ * This component allows users to choose between Athlete, Coach, or Scout roles.
+ * 
+ * @module RoleAssignmentScreen
+ */
+
+/**
+ * RoleAssignmentScreen Component
+ * Provides the user interface for selecting a role during registration.
+ * 
  * @component
  */
 const RoleAssignmentScreen = () => {
@@ -26,6 +34,7 @@ const RoleAssignmentScreen = () => {
 
   /**
    * Fetches and decodes the JWT token to get the user ID
+   * 
    * @async
    * @function fetchTokenAndDecode
    */

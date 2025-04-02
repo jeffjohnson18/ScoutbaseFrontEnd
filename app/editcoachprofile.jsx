@@ -1,6 +1,9 @@
 /**
  * Edit Coach Profile Component
  * Allows coaches to view and update their profile information.
+ * This component provides an interface for coaches to edit their profile details including
+ * team needs, school name, position, and bio.
+ * 
  * @module EditCoachProfile
  */
 
@@ -11,8 +14,8 @@ import { useRouter } from 'expo-router';
 
 /**
  * EditCoachProfile Component
- * Provides interface for coaches to edit their profile details including
- * team needs, school name, position, and bio.
+ * Provides the user interface for coaches to edit their profile details.
+ * 
  * @component
  */
 const EditCoachProfile = () => {
@@ -29,6 +32,7 @@ const EditCoachProfile = () => {
 
   /**
    * Fetches and populates coach profile data on component mount
+   * 
    * @async
    * @function fetchData
    */
@@ -69,6 +73,8 @@ const EditCoachProfile = () => {
 
   /**
    * Handles the profile update process
+   * Validates and sends updated profile data to the backend
+   * 
    * @async
    * @function handleSave
    */

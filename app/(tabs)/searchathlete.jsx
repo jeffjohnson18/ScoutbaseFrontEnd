@@ -1,17 +1,19 @@
 /**
  * Search Athlete Screen Component
  * Provides functionality to search and display athlete profiles based on various criteria.
+ * This component allows users to filter athletes by high school, positions, physical attributes, and bio information.
+ * 
  * @module SearchAthleteScreen
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the message box icon
 
 /**
  * SearchAthleteScreen Component
- * Allows users to search for athletes using filters such as high school,
- * positions, physical attributes, and bio information.
+ * Allows users to search for athletes using various filters.
+ * 
  * @component
  */
 const SearchAthleteScreen = () => {
@@ -26,38 +28,19 @@ const SearchAthleteScreen = () => {
   const [throwing_arm, setThrowingArm] = useState('');
   const [batting_arm, setBattingArm] = useState('');
   const [filtersVisible, setFiltersVisible] = useState(true);
-  const [email, setEmail] = useState(''); // State for email
-  const [userId, setUserId] = useState(null); // Assume you have a way to set the user ID
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
 
-  // Add animation values
+  // Animation values for UI transitions
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(50)).current;
   const formFadeAnim = React.useRef(new Animated.Value(0)).current;
   const formSlideAnim = React.useRef(new Animated.Value(30)).current;
   const resultsFadeAnim = React.useRef(new Animated.Value(0)).current;
 
-  // Fetch email function
-  const fetchEmail = async () => {
-    if (userId) {
-      try {
-        const response = await fetch(`http://localhost:8000/scoutbase/fetch-email/${userId}/`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch email');
-        }
-        const data = await response.json();
-        setEmail(data.email); // Assuming the response contains an email field
-      } catch (error) {
-        Alert.alert('Error', `Could not fetch email: ${error.message}`);
-      }
-    }
-  };
-
   useEffect(() => {
-    fetchEmail(); // Fetch email when the component mounts
-  }, [userId]);
-
-  // Add animation sequence
-  useEffect(() => {
+    // Animation sequence for component entrance
     Animated.sequence([
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -86,7 +69,7 @@ const SearchAthleteScreen = () => {
     ]).start();
   }, []);
 
-  // Add animation for results
+  // Animation for results display
   useEffect(() => {
     if (results.length > 0) {
       Animated.timing(resultsFadeAnim, {
@@ -98,8 +81,9 @@ const SearchAthleteScreen = () => {
   }, [results]);
 
   /**
-   * Handles the athlete search process
-   * Constructs query parameters and fetches matching athlete profiles
+   * Handles the athlete search process.
+   * Constructs query parameters and fetches matching athlete profiles from the backend.
+   * 
    * @async
    * @function handleSearch
    */
@@ -128,7 +112,7 @@ const SearchAthleteScreen = () => {
 
       const data = await response.json();
       setResults(data);
-      setFiltersVisible(false);
+      setFiltersVisible(false); // Hide filters after search
     } catch (error) {
       Alert.alert('Error', `Search failed. Please try again. ${error.message}`);
       console.error('Search Error:', error);
@@ -138,7 +122,31 @@ const SearchAthleteScreen = () => {
   };
 
   /**
-   * Renders individual athlete profile cards in the results list
+   * Fetches the email address for a specific user by user ID.
+   * 
+   * @async
+   * @function fetchEmailForProfile
+   * @param {number} userId - The ID of the user to fetch the email for
+   */
+  const fetchEmailForProfile = async (userId) => {
+    const url = `http://127.0.0.1:8000/scoutbase/fetch-email/${userId}/`;
+    console.log("Fetching email from:", url); // Log the request URL
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch email');
+      }
+      const data = await response.json();
+      setSelectedEmail(data.email); // Assuming the response contains an email field
+      setModalVisible(true); // Show the modal with the email
+    } catch (error) {
+      Alert.alert('Error', `Could not fetch email: ${error.message}`);
+    }
+  };
+
+  /**
+   * Renders individual athlete profile cards in the results list.
+   * 
    * @function renderItem
    * @param {Object} item - Athlete profile data to display
    */
@@ -160,16 +168,18 @@ const SearchAthleteScreen = () => {
           <Text style={styles.resultText}>Bio: {item.bio}</Text>
           <Text style={styles.resultText}>Throwing Arm: {item.throwing_arm}</Text>
           <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
+          <TouchableOpacity 
+            onPress={() => fetchEmailForProfile(item.user_id)} // Directly fetch email on press
+          >
+            <Text style={styles.emailText}>View Email</Text> {/* Button text updated */}
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => Alert.alert('Email', email)}>
-          <Ionicons name="mail" size={24} color="#1f8bde" />
-        </TouchableOpacity>
       </View>
     </View>
   );
 
   /**
-   * Render the search interface and results
+   * Render the search interface and results.
    */
   return (
     <View style={styles.container}>
@@ -190,7 +200,6 @@ const SearchAthleteScreen = () => {
         }]}>
           Connect with managers, coaches, and staff that meet your criteria.
         </Text>
-        
       </Animated.View>
 
       <TouchableOpacity onPress={() => setFiltersVisible(!filtersVisible)}>
@@ -238,21 +247,18 @@ const SearchAthleteScreen = () => {
             value={bio}
             onChangeText={setBio}
           />
-          
           <TextInput
             style={styles.input}
             placeholder="Throwing Arm"
             value={throwing_arm}
             onChangeText={setThrowingArm}
           />
-
           <TextInput
             style={styles.input}
             placeholder="Batting Arm"
             value={batting_arm}
             onChangeText={setBattingArm}
           />
-          
           <TouchableOpacity 
             style={styles.primaryButton}
             onPress={handleSearch}
@@ -280,6 +286,27 @@ const SearchAthleteScreen = () => {
           }
         />
       </Animated.View>
+
+      {/* Confirmation Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Email</Text>
+            <Text style={styles.modalText}>{selectedEmail}</Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -354,8 +381,8 @@ const styles = StyleSheet.create({
   },
   profileImage: {
     width: 60,
-    height: 60,
-    borderRadius: 30,
+    height: '90%',
+    borderRadius: 10,
     marginRight: 16,
   },
   profilePicture: {
@@ -381,6 +408,42 @@ const styles = StyleSheet.create({
     color: '#1f8bde',
     textAlign: 'center',
     marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#1f8bde',
+    padding: 10,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  emailText: {
+    color: '#1f8bde',
+    marginTop: 10,
+    textDecorationLine: 'none',
   },
 });
 

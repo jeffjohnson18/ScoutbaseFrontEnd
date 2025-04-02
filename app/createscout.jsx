@@ -1,6 +1,8 @@
 /**
  * Create Scout Profile Component
  * Handles the initial profile creation for scout users.
+ * This component provides an interface for creating a new scout profile after role assignment.
+ * 
  * @module CreateScoutProfile
  */
 
@@ -11,8 +13,8 @@ import { useRouter } from 'expo-router';
 
 /**
  * CreateScoutProfileScreen Component
- * Provides interface for creating a new scout profile after role assignment.
- * Currently implements basic profile creation with user ID verification.
+ * Provides the user interface for creating a new scout profile.
+ * 
  * @component
  */
 const CreateScoutProfileScreen = () => {
@@ -24,6 +26,7 @@ const CreateScoutProfileScreen = () => {
 
   /**
    * Fetches and decodes user token on component mount
+   * 
    * @async
    * @function fetchTokenAndDecode
    */
@@ -33,6 +36,7 @@ const CreateScoutProfileScreen = () => {
 
   /**
    * Retrieves and decodes JWT token to get user ID
+   * 
    * @async
    * @function fetchTokenAndDecode
    */
@@ -67,6 +71,8 @@ const CreateScoutProfileScreen = () => {
 
   /**
    * Handles the scout profile creation process
+   * Validates user ID and sends request to backend
+   * 
    * @async
    * @function handleCreateProfile
    */

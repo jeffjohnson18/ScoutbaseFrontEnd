@@ -190,9 +190,9 @@ const RegistrationScreen = () => {
       >
         <Text style={styles.welcomeText}>Welcome!</Text>
         <Text style={[styles.welcomeSubtext, { 
-          fontSize: 14,  // Reduced from 16
-          textAlign: 'center', // Ensure text is centered
-          paddingHorizontal: 20, // Add some padding for longer text
+          fontSize: 14,
+          textAlign: 'center',
+          paddingHorizontal: 20,
         }]}>
           Please enter the following details to create an account
         </Text>
@@ -314,10 +314,10 @@ const styles = StyleSheet.create({
   },
   welcomeSubtext: {
     fontFamily: 'SupraSans-Regular',
-    fontSize: 14, // Updated base font size
+    fontSize: 14, 
     color: '#666',
-    textAlign: 'center', // Added to style definition
-    paddingHorizontal: 20, // Added to style definition
+    textAlign: 'center', 
+    paddingHorizontal: 20, 
   },
   registerButton: {
     backgroundColor: '#1f8bde',

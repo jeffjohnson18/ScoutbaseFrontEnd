@@ -1,6 +1,9 @@
 /**
  * Create Coach Profile Component
  * Handles the initial profile creation for coach users.
+ * This component provides an interface for creating a new coach profile including team needs,
+ * school information, position, bio, and profile picture upload.
+ * 
  * @module CreateCoachProfile
  */
 
@@ -12,8 +15,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 /**
  * CreateCoachProfileScreen Component
- * Provides interface for creating a new coach profile including team needs,
- * school information, position, bio, and profile picture upload.
+ * Provides the user interface for creating a new coach profile.
+ * 
  * @component
  */
 const CreateCoachProfileScreen = () => {
@@ -30,6 +33,7 @@ const CreateCoachProfileScreen = () => {
 
   /**
    * Fetches and decodes user token on component mount
+   * 
    * @async
    * @function fetchTokenAndDecode
    */
@@ -39,6 +43,7 @@ const CreateCoachProfileScreen = () => {
 
   /**
    * Retrieves and decodes JWT token to get user ID
+   * 
    * @async
    * @function fetchTokenAndDecode
    */
@@ -75,6 +80,7 @@ const CreateCoachProfileScreen = () => {
 
   /**
    * Handles image selection from device library
+   * 
    * @async
    * @function pickImage
    */
@@ -109,6 +115,8 @@ const CreateCoachProfileScreen = () => {
 
   /**
    * Handles the coach profile creation process
+   * Validates form inputs and sends profile data to the backend
+   * 
    * @async
    * @function handleCreateProfile
    */

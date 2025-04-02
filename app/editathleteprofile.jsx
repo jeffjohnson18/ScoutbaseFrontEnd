@@ -1,6 +1,9 @@
 /**
  * Edit Athlete Profile Component
  * Allows athletes to view and update their profile information.
+ * This component provides an interface for athletes to edit their profile details including
+ * school information, positions, measurements, and personal details.
+ * 
  * @module EditAthleteProfile
  */
 
@@ -11,8 +14,8 @@ import { useRouter } from 'expo-router';
 
 /**
  * EditAthleteProfile Component
- * Provides interface for athletes to edit their profile details including
- * school information, positions, measurements, and personal details.
+ * Provides the user interface for athletes to edit their profile details.
+ * 
  * @component
  */
 const EditAthleteProfile = () => {
@@ -35,6 +38,7 @@ const EditAthleteProfile = () => {
 
   /**
    * Fetches and populates athlete profile data on component mount
+   * 
    * @async
    * @function fetchData
    */
@@ -81,6 +85,7 @@ const EditAthleteProfile = () => {
   /**
    * Handles the profile update process
    * Validates and sends updated profile data to the backend
+   * 
    * @async
    * @function handleSave
    */

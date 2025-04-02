@@ -1,6 +1,9 @@
 /**
  * Create Athlete Profile Component
  * Handles the initial profile creation for athlete users.
+ * This component provides an interface for creating a new athlete profile including school information,
+ * physical attributes, positions, media links, and profile picture upload.
+ * 
  * @module CreateAthleteProfile
  */
 
@@ -12,8 +15,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 /**
  * CreateAthleteProfileScreen Component
- * Provides interface for creating a new athlete profile including school information,
- * physical attributes, positions, media links, and profile picture upload.
+ * Provides the user interface for creating a new athlete profile.
+ * 
  * @component
  */
 const CreateAthleteProfileScreen = () => {
@@ -36,6 +39,7 @@ const CreateAthleteProfileScreen = () => {
 
   /**
    * Fetches and decodes user token on component mount
+   * 
    * @async
    * @function fetchTokenAndDecode
    */
@@ -45,6 +49,7 @@ const CreateAthleteProfileScreen = () => {
 
   /**
    * Retrieves and decodes JWT token to get user ID
+   * 
    * @async
    * @function fetchTokenAndDecode
    */
@@ -75,6 +80,7 @@ const CreateAthleteProfileScreen = () => {
 
   /**
    * Handles image selection from device library
+   * 
    * @async
    * @function pickImage
    */
@@ -104,6 +110,8 @@ const CreateAthleteProfileScreen = () => {
 
   /**
    * Handles the athlete profile creation process
+   * Validates form inputs and sends profile data to the backend
+   * 
    * @async
    * @function handleCreateProfile
    */
@@ -171,108 +179,107 @@ const CreateAthleteProfileScreen = () => {
    */
   return (
     <ScrollView>
-    <View style={styles.container}>
-      {showSplash ? (
-        <View style={styles.splashContainer}>
-          <Text style={styles.splashText}>Profile Created!</Text>
-          <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
-        </View>
-      ) : (
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
-      )}
-
-      <View style={styles.welcomeContainer}>
-        <Text style={styles.welcomeText}>Create Your Profile</Text>
-        <Text style={styles.welcomeSubtext}>Tell us about yourself</Text>
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      </View>
-
-      <View style={styles.formContainer}>
-        <TextInput 
-          style={styles.input} 
-          placeholder="High School Name" 
-          value={highSchoolName} 
-          onChangeText={setHighSchoolName} 
-        />
-
-        <TextInput 
-          style={styles.input} 
-          placeholder="Positions (e.g., Pitcher, Outfielder)" 
-          value={positions} 
-          onChangeText={setPositions} 
-        />
-
-        <TextInput 
-          style={styles.input} 
-          placeholder="YouTube Video Link (optional)" 
-          value={youtubeVideoLink} 
-          onChangeText={setYoutubeVideoLink} 
-        />
-
-        <TextInput 
-          style={styles.input} 
-          placeholder="Height (e.g., 6.1)" 
-          value={height} 
-          onChangeText={setHeight} 
-          keyboardType="numeric" 
-        />
-
-        <TextInput 
-          style={styles.input} 
-          placeholder="Weight (e.g., 180)" 
-          value={weight} 
-          onChangeText={setWeight} 
-          keyboardType="numeric" 
-        />
-
-        <TextInput 
-          style={styles.input} 
-          placeholder="Bio" 
-          value={bio} 
-          onChangeText={setBio} 
-          multiline 
-        />
-
-        <TextInput 
-          style={styles.input} 
-          placeholder="State" 
-          value={state} 
-          onChangeText={setState} 
-        />
-
-        <TextInput 
-          style={styles.input} 
-          placeholder="Throwing Arm" 
-          value={throwing_arm} 
-          onChangeText={setThrowingArm} 
-        />
-
-        <TextInput 
-          style={styles.input} 
-          placeholder="Batting Arm" 
-          value={batting_arm} 
-          onChangeText={setBattingArm} 
-        />
-        
-
-        {profilePicture && (
-          <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+      <View style={styles.container}>
+        {showSplash ? (
+          <View style={styles.splashContainer}>
+            <Text style={styles.splashText}>Profile Created!</Text>
+            <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
+          </View>
+        ) : (
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.button} onPress={pickImage}>
-          <Text style={styles.buttonText}>Select Profile Picture</Text>
-        </TouchableOpacity>
+        <View style={styles.welcomeContainer}>
+          <Text style={styles.welcomeText}>Create Your Profile</Text>
+          <Text style={styles.welcomeSubtext}>Tell us about yourself</Text>
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        </View>
 
-        <TouchableOpacity style={styles.primaryButton} onPress={handleCreateProfile}>
-          <Text style={styles.buttonText}>Create Profile</Text>
-        </TouchableOpacity>
+        <View style={styles.formContainer}>
+          <TextInput 
+            style={styles.input} 
+            placeholder="High School Name" 
+            value={highSchoolName} 
+            onChangeText={setHighSchoolName} 
+          />
+
+          <TextInput 
+            style={styles.input} 
+            placeholder="Positions (e.g., Pitcher, Outfielder)" 
+            value={positions} 
+            onChangeText={setPositions} 
+          />
+
+          <TextInput 
+            style={styles.input} 
+            placeholder="YouTube Video Link (optional)" 
+            value={youtubeVideoLink} 
+            onChangeText={setYoutubeVideoLink} 
+          />
+
+          <TextInput 
+            style={styles.input} 
+            placeholder="Height (e.g., 6.1)" 
+            value={height} 
+            onChangeText={setHeight} 
+            keyboardType="numeric" 
+          />
+
+          <TextInput 
+            style={styles.input} 
+            placeholder="Weight (e.g., 180)" 
+            value={weight} 
+            onChangeText={setWeight} 
+            keyboardType="numeric" 
+          />
+
+          <TextInput 
+            style={styles.input} 
+            placeholder="Bio" 
+            value={bio} 
+            onChangeText={setBio} 
+            multiline 
+          />
+
+          <TextInput 
+            style={styles.input} 
+            placeholder="State" 
+            value={state} 
+            onChangeText={setState} 
+          />
+
+          <TextInput 
+            style={styles.input} 
+            placeholder="Throwing Arm" 
+            value={throwing_arm} 
+            onChangeText={setThrowingArm} 
+          />
+
+          <TextInput 
+            style={styles.input} 
+            placeholder="Batting Arm" 
+            value={batting_arm} 
+            onChangeText={setBattingArm} 
+          />
+          
+          {profilePicture && (
+            <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+          )}
+
+          <TouchableOpacity style={styles.button} onPress={pickImage}>
+            <Text style={styles.buttonText}>Select Profile Picture</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.primaryButton} onPress={handleCreateProfile}>
+            <Text style={styles.buttonText}>Create Profile</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
     </ScrollView>
   );
 };

@@ -1,16 +1,19 @@
 /**
  * Search Coach Screen Component
  * Provides functionality to search and display coach profiles based on various criteria.
+ * This component allows users to filter coaches by team needs, school name, position, and bio information.
+ * 
  * @module SearchCoachScreen
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the message box icon
 
 /**
  * SearchCoachScreen Component
- * Allows users to search for coaches using filters such as team needs,
- * school name, position, and bio information.
+ * Allows users to search for coaches using various filters.
+ * 
  * @component
  */
 const SearchCoachScreen = () => {
@@ -21,17 +24,20 @@ const SearchCoachScreen = () => {
   const [bio, setBio] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [filtersVisible, setFiltersVisible] = useState(true); // Default to true
+  const [filtersVisible, setFiltersVisible] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
 
-  // Animation values
+  // Animation values for UI transitions
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(50)).current;
   const formFadeAnim = React.useRef(new Animated.Value(0)).current;
   const formSlideAnim = React.useRef(new Animated.Value(30)).current;
   const resultsFadeAnim = React.useRef(new Animated.Value(0)).current;
 
-  // Add animation sequence
   useEffect(() => {
+    // Animation sequence for component entrance
     Animated.sequence([
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -60,7 +66,7 @@ const SearchCoachScreen = () => {
     ]).start();
   }, []);
 
-  // Add animation for results
+  // Animation for results display
   useEffect(() => {
     if (results.length > 0) {
       Animated.timing(resultsFadeAnim, {
@@ -72,22 +78,21 @@ const SearchCoachScreen = () => {
   }, [results]);
 
   /**
-   * Handles the coach search process
-   * Constructs query parameters and fetches matching coach profiles
+   * Handles the coach search process.
+   * Constructs query parameters and fetches matching coach profiles from the backend.
+   * 
    * @async
    * @function handleSearch
    */
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      // Construct query parameters from filled fields
       const queryParams = new URLSearchParams();
       if (teamNeeds) queryParams.append('team_needs', teamNeeds);
       if (schoolName) queryParams.append('school_name', schoolName);
       if (position) queryParams.append('position', position);
       if (bio) queryParams.append('bio', bio);
 
-      // Send search request to backend
       const response = await fetch(`http://localhost:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
@@ -104,21 +109,43 @@ const SearchCoachScreen = () => {
       setFiltersVisible(false); // Hide filters after search
     } catch (error) {
       Alert.alert('Error', `Search failed. Please try again. ${error.message}`);
-      console.error('Search Error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * Renders individual coach profile cards in the results list
+   * Fetches the email address for a specific user by user ID.
+   * 
+   * @async
+   * @function fetchEmailForProfile
+   * @param {number} userId - The ID of the user to fetch the email for
+   */
+  const fetchEmailForProfile = async (userId) => {
+    const url = `http://127.0.0.1:8000/scoutbase/fetch-email/${userId}/`;
+    console.log("Fetching email from:", url); // Log the request URL
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch email');
+      }
+      const data = await response.json();
+      setSelectedEmail(data.email); // Assuming the response contains an email field
+      setModalVisible(true); // Show the modal with the email
+    } catch (error) {
+      Alert.alert('Error', `Could not fetch email: ${error.message}`);
+    }
+  };
+
+  /**
+   * Renders individual coach profile cards in the results list.
+   * 
    * @function renderItem
    * @param {Object} item - Coach profile data to display
    */
   const renderItem = ({ item }) => (
     <View style={styles.resultCard}>
       <View style={styles.profileContainer}>
-        {/* Profile picture display - shows image or default icon */}
         {item.profile_picture && item.profile_picture.startsWith('http') ? (
           <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
         ) : (
@@ -130,13 +157,18 @@ const SearchCoachScreen = () => {
           <Text style={styles.resultText}>School Name: {item.school_name}</Text>
           <Text style={styles.resultText}>Position: {item.position}</Text>
           <Text style={styles.resultText}>Bio: {item.bio}</Text>
+          <TouchableOpacity 
+            onPress={() => fetchEmailForProfile(item.user_id)}
+          >
+            <Text style={styles.emailText}>View Email</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 
   /**
-   * Render the search interface and results
+   * Render the search interface and results.
    */
   return (
     <View style={styles.container}>
@@ -196,7 +228,6 @@ const SearchCoachScreen = () => {
             value={bio}
             onChangeText={setBio}
           />
-
           <TouchableOpacity 
             style={styles.primaryButton}
             onPress={handleSearch}
@@ -224,6 +255,27 @@ const SearchCoachScreen = () => {
           }
         />
       </Animated.View>
+
+      {/* Confirmation Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Email</Text>
+            <Text style={styles.modalText}>{selectedEmail}</Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -298,8 +350,8 @@ const styles = StyleSheet.create({
   },
   profileImage: {
     width: 60,
-    height: 60,
-    borderRadius: 30,
+    height: '90%',
+    borderRadius: 10,
     marginRight: 16,
   },
   profilePicture: {
@@ -325,6 +377,42 @@ const styles = StyleSheet.create({
     color: '#1f8bde',
     textAlign: 'center',
     marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#1f8bde',
+    padding: 10,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  emailText: {
+    color: '#1f8bde',
+    marginTop: 10,
+    textDecorationLine: 'none',
   },
 });
 

@@ -1,6 +1,9 @@
 /**
  * Profile Screen Component
  * Displays user profile information based on their role (Athlete or Coach).
+ * This component fetches and displays user-specific profile information, including personal details,
+ * athletic information, or coaching details based on user role.
+ * 
  * @module ProfileScreen
  */
 
@@ -11,8 +14,8 @@ import { useRouter } from 'expo-router';
 
 /**
  * ProfileScreen Component
- * Fetches and displays user-specific profile information, including personal details,
- * athletic information, or coaching details based on user role.
+ * Fetches and displays user-specific profile information.
+ * 
  * @component
  */
 const ProfileScreen = () => {
@@ -23,7 +26,7 @@ const ProfileScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Add animation values
+  // Add animation values for UI transitions
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(50)).current;
   const profileFadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -32,8 +35,9 @@ const ProfileScreen = () => {
   const infoSlideAnim = React.useRef(new Animated.Value(50)).current;
 
   /**
-   * Fetches user profile data on component mount
-   * Includes token verification, role checking, and profile data retrieval
+   * Fetches user profile data on component mount.
+   * Includes token verification, role checking, and profile data retrieval.
+   * 
    * @async
    * @function fetchData
    */
@@ -72,7 +76,7 @@ const ProfileScreen = () => {
     fetchData();
   }, []);
 
-  // Add animation sequence
+  // Add animation sequence for profile display
   useEffect(() => {
     if (!isLoading && profileData) {
       Animated.sequence([
@@ -120,7 +124,8 @@ const ProfileScreen = () => {
   }, [isLoading, profileData]);
 
   /**
-   * Handles user logout process
+   * Handles user logout process.
+   * 
    * @async
    * @function handleLogout
    */
