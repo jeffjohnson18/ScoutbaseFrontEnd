@@ -61,11 +61,15 @@ const ProfileScreen = () => {
         // Fetch profile data based on user role
         const profileEndpoint = roleData.role === 'Athlete'
           ? `http://localhost:8000/scoutbase/searchforathlete?user_id=${userId}`
-          : `http://localhost:8000/scoutbase/searchforcoach?user_id=${userId}`;
+          : roleData.role === 'Coach'
+          ? `http://localhost:8000/scoutbase/searchforcoach?user_id=${userId}`
+          : null; // No profile data for Scout
 
-        const profileResponse = await fetch(profileEndpoint);
-        const profileData = await profileResponse.json();
-        setProfileData(profileData[0]);
+        if (profileEndpoint) {
+          const profileResponse = await fetch(profileEndpoint);
+          const profileData = await profileResponse.json();
+          setProfileData(profileData[0]);
+        }
       } catch (error) {
         Alert.alert('Error', 'Failed to load profile data.');
       } finally {
@@ -173,7 +177,7 @@ const ProfileScreen = () => {
         >
           <Text style={styles.welcomeText}>Your Profile</Text>
           <Text style={styles.welcomeSubtext}>
-            {role === 'Athlete' ? 'Athlete Profile' : 'Coach Profile'}
+            {role === 'Athlete' ? 'Athlete Profile' : role === 'Coach' ? 'Coach Profile' : 'Scout Profile'}
           </Text>
         </Animated.View>
 
@@ -184,12 +188,16 @@ const ProfileScreen = () => {
               transform: [{ translateY: profileSlideAnim }],
             }}
           >
-            {profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
-              <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+            {role === 'Scout' ? (
+              <Text style={styles.infoText}>You selected a scout profile, so you have no public-facing account.</Text>
             ) : (
-              <View style={styles.defaultProfileImage}>
-                <Text style={styles.defaultProfileText}>👤</Text>
-              </View>
+              profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
+                <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+              ) : (
+                <View style={styles.defaultProfileImage}>
+                  <Text style={styles.defaultProfileText}>👤</Text>
+                </View>
+              )
             )}
           </Animated.View>
 
@@ -223,7 +231,7 @@ const ProfileScreen = () => {
                 <Text style={styles.infoLabel}>Bio</Text>
                 <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>
               </>
-            ) : (
+            ) : role === 'Coach' ? (
               <>
                 <Text style={styles.infoLabel}>Team Needs</Text>
                 <Text style={styles.infoText}>{profileData.team_needs}</Text>
@@ -237,7 +245,7 @@ const ProfileScreen = () => {
                 <Text style={styles.infoLabel}>Bio</Text>
                 <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>
               </>
-            )}
+            ) : null}
           </Animated.View>
 
           <Animated.View

@@ -102,9 +102,9 @@ const CreateScoutProfileScreen = () => {
       setIsLoading(false);
       // Show splash screen
       setShowSplash(true);
-      // Wait 2 seconds then navigate
+      // Wait 2 seconds then navigate to home page
       setTimeout(() => {
-        router.push('/profile');
+        router.push('/home'); // Redirect to home page
       }, 2000);
 
     } catch (error) {
@@ -121,7 +121,7 @@ const CreateScoutProfileScreen = () => {
       {showSplash ? (
         <View style={styles.splashContainer}>
           <Text style={styles.splashText}>Profile Created!</Text>
-          <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
+          <Text style={styles.splashSubtext}>Redirecting to home page...</Text>
         </View>
       ) : (
         <>

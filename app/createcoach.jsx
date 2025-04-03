@@ -7,8 +7,8 @@
  * @module CreateCoachProfile
  */
 
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, Image, Platform, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, TextInput, StyleSheet, Image, Platform, Text, TouchableOpacity, Animated } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -24,12 +24,13 @@ const CreateCoachProfileScreen = () => {
   const [userId, setUserId] = useState(null);
   const [teamNeeds, setTeamNeeds] = useState('');
   const [schoolName, setSchoolName] = useState('');
-  const [position, setPosition] = useState('');
+  const [position_within_org, setPositionWithinOrg] = useState('');
   const [bio, setBio] = useState('');
   const [profilePicture, setProfilePicture] = useState(null);
   const [error, setError] = useState('');
   const [showSplash, setShowSplash] = useState(false);
   const router = useRouter();
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   /**
    * Fetches and decodes user token on component mount
@@ -39,6 +40,11 @@ const CreateCoachProfileScreen = () => {
    */
   useEffect(() => {
     fetchTokenAndDecode();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   /**
@@ -122,7 +128,7 @@ const CreateCoachProfileScreen = () => {
    */
   const handleCreateProfile = async () => {
     // Validate required fields
-    if (!userId || !teamNeeds || !schoolName || !position || !bio) {
+    if (!userId || !teamNeeds || !schoolName || !position_within_org || !bio) {
       setError('Please fill in all required fields');
       return;
     }
@@ -132,7 +138,7 @@ const CreateCoachProfileScreen = () => {
     profileData.append('user_id', userId);
     profileData.append('team_needs', teamNeeds);
     profileData.append('school_name', schoolName);
-    profileData.append('position', position);
+    profileData.append('position_within_org', position_within_org);
     profileData.append('bio', bio);
 
     // Append profile picture if selected
@@ -178,73 +184,75 @@ const CreateCoachProfileScreen = () => {
    * Render the profile creation form interface
    */
   return (
-    <View style={styles.container}>
-      {showSplash ? (
-        <View style={styles.splashContainer}>
-          <Text style={styles.splashText}>Profile Created!</Text>
-          <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
-        </View>
-      ) : (
-        <>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.backButtonText}>← Back</Text>
-          </TouchableOpacity>
-
-          <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeText}>Create Coach Profile</Text>
-            <Text style={styles.welcomeSubtext}>Tell us about your team</Text>
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+    <Animated.View style={{ opacity: fadeAnim }}>
+      <View style={styles.container}>
+        {showSplash ? (
+          <View style={styles.splashContainer}>
+            <Text style={styles.splashText}>Profile Created!</Text>
+            <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
           </View>
-
-          <View style={styles.formContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Team Needs (e.g., Looking for pitchers)"
-              value={teamNeeds}
-              onChangeText={setTeamNeeds}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="School Name"
-              value={schoolName}
-              onChangeText={setSchoolName}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Position (e.g., Head Coach)"
-              value={position}
-              onChangeText={setPosition}
-            />
-
-            <TextInput
-              style={[styles.input, styles.bioInput]}
-              placeholder="Bio"
-              value={bio}
-              onChangeText={setBio}
-              multiline
-              numberOfLines={4}
-            />
-            
-            {profilePicture && (
-              <Image source={{ uri: profilePicture }} style={styles.profileImage} />
-            )}
-
-            <TouchableOpacity style={styles.button} onPress={pickImage}>
-              <Text style={styles.buttonText}>Choose Profile Picture</Text>
+        ) : (
+          <>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.backButtonText}>← Back</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.primaryButton} onPress={handleCreateProfile}>
-              <Text style={styles.buttonText}>Create Profile</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-    </View>
+
+            <View style={styles.welcomeContainer}>
+              <Text style={styles.welcomeText}>Create Coach Profile</Text>
+              <Text style={styles.welcomeSubtext}>Tell us about your team</Text>
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            </View>
+
+            <View style={styles.formContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Team Needs (e.g., Looking for pitchers)"
+                value={teamNeeds}
+                onChangeText={setTeamNeeds}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="School Name"
+                value={schoolName}
+                onChangeText={setSchoolName}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Position Within Organization"
+                value={position_within_org}
+                onChangeText={setPositionWithinOrg}
+              />
+
+              <TextInput
+                style={[styles.input, styles.bioInput]}
+                placeholder="Bio"
+                value={bio}
+                onChangeText={setBio}
+                multiline
+                numberOfLines={4}
+              />
+              
+              {profilePicture && (
+                <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+              )}
+
+              <TouchableOpacity style={styles.button} onPress={pickImage}>
+                <Text style={styles.buttonText}>Choose Profile Picture</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.primaryButton} onPress={handleCreateProfile}>
+                <Text style={styles.buttonText}>Create Profile</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </View>
+    </Animated.View>
   );
 };
 

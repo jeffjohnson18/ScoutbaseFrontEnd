@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the message box icon
 
 /**
@@ -20,7 +20,7 @@ const SearchCoachScreen = () => {
   // State management for search filters and results
   const [teamNeeds, setTeamNeeds] = useState('');
   const [schoolName, setSchoolName] = useState('');
-  const [position, setPosition] = useState('');
+  const [position_within_org, setPosition] = useState('');
   const [bio, setBio] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,7 +90,7 @@ const SearchCoachScreen = () => {
       const queryParams = new URLSearchParams();
       if (teamNeeds) queryParams.append('team_needs', teamNeeds);
       if (schoolName) queryParams.append('school_name', schoolName);
-      if (position) queryParams.append('position', position);
+      if (position_within_org) queryParams.append('position', position_within_org);
       if (bio) queryParams.append('bio', bio);
 
       const response = await fetch(`http://localhost:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
@@ -155,7 +155,7 @@ const SearchCoachScreen = () => {
         <View>
           <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
           <Text style={styles.resultText}>School Name: {item.school_name}</Text>
-          <Text style={styles.resultText}>Position: {item.position}</Text>
+          <Text style={styles.resultText}>Position Within Org: {item.position_within_org}</Text>
           <Text style={styles.resultText}>Bio: {item.bio}</Text>
           <TouchableOpacity 
             onPress={() => fetchEmailForProfile(item.user_id)}
@@ -171,7 +171,10 @@ const SearchCoachScreen = () => {
    * Render the search interface and results.
    */
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Adjust behavior for keyboard
+    >
       <Animated.View 
         style={[
           styles.welcomeContainer,
@@ -218,8 +221,8 @@ const SearchCoachScreen = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="Position"
-            value={position}
+            placeholder="Position Within Organization"
+            value={position_within_org}
             onChangeText={setPosition}
           />
           <TextInput
@@ -276,7 +279,7 @@ const SearchCoachScreen = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -332,6 +335,7 @@ const styles = StyleSheet.create({
   },
   resultsContainer: {
     marginTop: 16,
+    paddingBottom: 100, // Add padding to ensure the last item is visible
   },
   resultCard: {
     padding: 16,

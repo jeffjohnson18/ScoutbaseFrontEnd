@@ -31,6 +31,7 @@ const SearchAthleteScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
+  const [state, setState] = useState('');
 
   // Animation values for UI transitions
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -90,15 +91,14 @@ const SearchAthleteScreen = () => {
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      // Construct query parameters from filled fields
       const queryParams = new URLSearchParams();
       if (highSchool) queryParams.append('high_school_name', highSchool);
       if (positions) queryParams.append('positions', positions);
       if (bio) queryParams.append('bio', bio);
       if (height) queryParams.append('height', height);
       if (weight) queryParams.append('weight', weight);
+      if (state) queryParams.append('state', state);
 
-      // Send search request to backend
       const response = await fetch(`http://localhost:8000/scoutbase/searchforathlete?${queryParams.toString()}`, {
         method: 'GET',
         headers: {
@@ -163,15 +163,16 @@ const SearchAthleteScreen = () => {
         <View>
           <Text style={styles.resultText}>High School: {item.high_school_name}</Text>
           <Text style={styles.resultText}>Positions: {item.positions}</Text>
-          <Text style={styles.resultText}>Height: {item.height} inches</Text>
+          <Text style={styles.resultText}>Height: {item.height} feet/inches</Text>
           <Text style={styles.resultText}>Weight: {item.weight} lbs</Text>
+          <Text style={styles.resultText}>State: {item.state}</Text>
           <Text style={styles.resultText}>Bio: {item.bio}</Text>
           <Text style={styles.resultText}>Throwing Arm: {item.throwing_arm}</Text>
           <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
           <TouchableOpacity 
             onPress={() => fetchEmailForProfile(item.user_id)} // Directly fetch email on press
           >
-            <Text style={styles.emailText}>View Email</Text> {/* Button text updated */}
+            <Text style={styles.emailText}>View Email</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -258,6 +259,12 @@ const SearchAthleteScreen = () => {
             placeholder="Batting Arm"
             value={batting_arm}
             onChangeText={setBattingArm}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="State (e.g., CA, OR, AZ)"
+            value={state}
+            onChangeText={setState}
           />
           <TouchableOpacity 
             style={styles.primaryButton}

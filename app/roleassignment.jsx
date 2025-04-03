@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Button, StyleSheet, Alert, TouchableOpacity, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
 import { useFonts } from 'expo-font';
@@ -25,6 +25,9 @@ const RoleAssignmentScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  // Animation values for UI transitions
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Load custom fonts for the application
   const [fontsLoaded] = useFonts({
@@ -71,6 +74,12 @@ const RoleAssignmentScreen = () => {
   // Fetch token when component mounts
   useEffect(() => {
     fetchTokenAndDecode();
+    // Start the fade-in animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   /**
@@ -135,7 +144,7 @@ const RoleAssignmentScreen = () => {
    * Render the role selection interface
    */
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <TouchableOpacity 
         style={styles.backButton}
         onPress={() => router.back()}
@@ -204,7 +213,7 @@ const RoleAssignmentScreen = () => {
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </Animated.View>
   );
 };
 

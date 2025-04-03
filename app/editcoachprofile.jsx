@@ -24,7 +24,7 @@ const EditCoachProfile = () => {
   const [profileData, setProfileData] = useState({
     team_needs: '',
     school_name: '',
-    position: '',
+    position_within_org: '',
     bio: '',
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +57,7 @@ const EditCoachProfile = () => {
           setProfileData({
             team_needs: profile[0]?.team_needs || '',
             school_name: profile[0]?.school_name || '',
-            position: profile[0]?.position || '',
+            position_within_org: profile[0]?.position_within_org || '',
             bio: profile[0]?.bio || '',
           });
         }
@@ -84,7 +84,7 @@ const EditCoachProfile = () => {
       const requestBody = {
         team_needs: profileData.team_needs || null,
         school_name: profileData.school_name || null,
-        position: profileData.position || null,
+        position_within_org: profileData.position_within_org || null,
         bio: profileData.bio || null,
       };
 
@@ -142,9 +142,9 @@ const EditCoachProfile = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="Position"
-            value={profileData.position}
-            onChangeText={(text) => setProfileData({ ...profileData, position: text })}
+            placeholder="Position Within Organization"
+            value={profileData.position_within_org}
+            onChangeText={(text) => setProfileData({ ...profileData, position_within_org: text })}
           />
           <TextInput
             style={styles.input}
