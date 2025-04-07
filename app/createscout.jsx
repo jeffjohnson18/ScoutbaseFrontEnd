@@ -136,9 +136,7 @@ const CreateScoutProfileScreen = () => {
             <Text style={styles.welcomeText}>Create Scout Profile</Text>
             <Text style={styles.welcomeSubtext}>Start discovering talent</Text>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          </View>
 
-          <View style={styles.contentContainer}>
             <TouchableOpacity 
               style={styles.primaryButton} 
               onPress={handleCreateProfile}
@@ -148,6 +146,10 @@ const CreateScoutProfileScreen = () => {
                 {isLoading ? 'Creating Profile...' : 'Create Scout Profile'}
               </Text>
             </TouchableOpacity>
+
+            <Text style={styles.noteText}>
+              Are you sure you want to make a scout profile? You will miss out on creating a profile, as a coach or athlete does.
+            </Text>
           </View>
         </>
       )}
@@ -178,7 +180,7 @@ const styles = StyleSheet.create({
   },
   welcomeContainer: {
     marginTop: 100,
-    marginBottom: 30,
+    marginBottom: 20,
     alignItems: 'center',
   },
   welcomeText: {
@@ -212,6 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     width: '100%',
+    marginTop: 10,
   },
   buttonText: {
     fontFamily: 'SupraSans-Regular',
@@ -234,6 +237,13 @@ const styles = StyleSheet.create({
     fontFamily: 'SupraSans-Regular',
     fontSize: 18,
     color: '#666',
+  },
+  noteText: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 14,
+    color: '#666',
+    marginTop: 10,
+    textAlign: 'center',
   },
 });
 

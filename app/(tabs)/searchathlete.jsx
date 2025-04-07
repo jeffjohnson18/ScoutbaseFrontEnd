@@ -161,12 +161,12 @@ const SearchAthleteScreen = () => {
         )}
         {/* Athlete profile details */}
         <View>
-          <Text style={styles.resultText}>High School: {item.high_school_name}</Text>
-          <Text style={styles.resultText}>Positions: {item.positions}</Text>
-          <Text style={styles.resultText}>Height: {item.height} feet/inches</Text>
-          <Text style={styles.resultText}>Weight: {item.weight} lbs</Text>
-          <Text style={styles.resultText}>State: {item.state}</Text>
-          <Text style={styles.resultText}>Bio: {item.bio}</Text>
+          <Text style={styles.resultText}>{item.high_school_name}</Text>
+          <Text style={styles.resultText}>{item.positions}</Text>
+          <Text style={styles.resultText}>{item.height} feet/inches</Text>
+          <Text style={styles.resultText}>{item.weight} lbs</Text>
+          <Text style={styles.resultText}>{item.state}</Text>
+          <Text style={styles.resultText}>{item.bio}</Text>
           <Text style={styles.resultText}>Throwing Arm: {item.throwing_arm}</Text>
           <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
           <TouchableOpacity 

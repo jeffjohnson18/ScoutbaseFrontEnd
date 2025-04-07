@@ -169,7 +169,13 @@ const RoleAssignmentScreen = () => {
         >
           <Text style={styles.roleTitle}>Athlete</Text>
           <Text style={styles.roleDescription}>
-            For players looking to showcase their skills and connect with coaches and scouts
+            - Search and contact coaches
+          </Text>
+          <Text style={styles.roleDescription}>
+            - Upload youtube videos
+          </Text>
+          <Text style={styles.roleDescription}>
+            - Manage recruitment preferences
           </Text>
         </TouchableOpacity>
 
@@ -183,7 +189,13 @@ const RoleAssignmentScreen = () => {
         >
           <Text style={styles.roleTitle}>Coach</Text>
           <Text style={styles.roleDescription}>
-            For team leaders who develop talent and guide athletes to their full potential
+            - List your team needs
+          </Text>
+          <Text style={styles.roleDescription}>
+            - Search athletes by your preferences
+          </Text>
+          <Text style={styles.roleDescription}>
+            - Contact athletes
           </Text>
         </TouchableOpacity>
 
@@ -197,7 +209,10 @@ const RoleAssignmentScreen = () => {
         >
           <Text style={styles.roleTitle}>Scout</Text>
           <Text style={styles.roleDescription}>
-            For talent evaluators seeking promising athletes for their organizations
+            - Search athletes and coaches
+          </Text>
+          <Text style={styles.roleDescription}>
+            - For the user who just wants to look
           </Text>
         </TouchableOpacity>
 

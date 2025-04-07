@@ -136,8 +136,15 @@ const LoginScreen = () => {
       const roleData = await roleResponse.json();
 
       if (!roleData.role) {
-        router.push('/roleassignment');
+        // If no role is found, redirect to home page
+        router.push('/home');
       } else {
+        // If the user is a scout, redirect to home page directly
+        if (roleData.role === 'Scout') {
+          router.push('/home');
+          return; // Exit the function early
+        }
+
         let profileResponse;
         let profileData;
 
@@ -145,16 +152,14 @@ const LoginScreen = () => {
           profileResponse = await fetch(`http://localhost:8000/scoutbase/searchforathlete?user_id=${userId}`);
         } else if (roleData.role === 'Coach') {
           profileResponse = await fetch(`http://localhost:8000/scoutbase/searchforcoach?user_id=${userId}`);
-        } else if (roleData.role === 'Scout') {
-          profileResponse = await fetch(`http://localhost:8000/scoutbase/searchforscout?user_id=${userId}`);
         }
-  
+
         if (!profileResponse.ok) {
           throw new Error('Failed to fetch profile data');
         }
-  
+
         profileData = await profileResponse.json();
-  
+
         // Step 3: Check profile completion status
         const isProfileComplete = Object.values(profileData).some(value => value !== null && value !== '');
         
@@ -165,8 +170,6 @@ const LoginScreen = () => {
             router.push('/createathlete');
           } else if (roleData.role === 'Coach') {
             router.push('/createcoach');
-          } else if (roleData.role === 'Scout') {
-            router.push('/createscout');
           }
         } else {
           // Profile is complete, proceed to home page without alert

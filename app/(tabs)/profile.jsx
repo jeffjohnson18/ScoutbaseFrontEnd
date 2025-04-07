@@ -154,7 +154,13 @@ const ProfileScreen = () => {
   if (!profileData) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Failed to load profile data.</Text>
+        {role === 'Scout' ? (
+          <View style={styles.scoutMessageContainer}>
+            <Text style={styles.scoutMessageText} onPress={handleLogout}>
+              You selected a scout profile, so you have no public-facing account. Press here to log out.
+            </Text>
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -189,7 +195,9 @@ const ProfileScreen = () => {
             }}
           >
             {role === 'Scout' ? (
-              <Text style={styles.infoText}>You selected a scout profile, so you have no public-facing account.</Text>
+              <Text style={styles.infoText} onPress={handleLogout} >You selected a scout profile, so you have no public-facing account. Logout here</Text>
+              
+
             ) : (
               profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
                 <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
@@ -388,6 +396,18 @@ const styles = StyleSheet.create({
     fontFamily: 'SupraSans-Regular',
     fontSize: 14,
     color: '#e63946',
+    textAlign: 'center',
+  },
+  scoutMessageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  scoutMessageText: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 16,
+    color: '#1f8bde',
     textAlign: 'center',
   },
 });
