@@ -100,6 +100,8 @@ const SearchAthleteScreen = () => {
       if (height) queryParams.append('height', height);
       if (weight) queryParams.append('weight', weight);
       if (state) queryParams.append('state', state);
+      if (throwing_arm) queryParams.append('throwing_arm', throwing_arm);
+      if (batting_arm) queryParams.append('battingß_arm', batting_arm);
 
       const response = await fetch(`http://localhost:8000/scoutbase/searchforathlete?${queryParams.toString()}`, {
         method: 'GET',
