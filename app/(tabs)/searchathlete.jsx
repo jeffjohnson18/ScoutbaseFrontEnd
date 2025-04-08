@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal, ScrollView, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the message box icon
 
 /**
@@ -275,7 +275,9 @@ const SearchAthleteScreen = () => {
                       <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
                       {/* Display YouTube video link if it exists */}
                       {item.youtube_video_link ? (
-                        <Text style={styles.resultText}>YouTube Video: {item.youtube_video_link}</Text>
+                        <TouchableOpacity onPress={() => Linking.openURL(item.youtube_video_link)}>
+                          <Text style={[styles.resultText, { color: 'blue' }]}>YouTube Video: {item.youtube_video_link}</Text>
+                        </TouchableOpacity>
                       ) : (
                         <Text style={styles.resultText}></Text>
                       )}

@@ -92,7 +92,7 @@ const SearchCoachScreen = () => {
       if (name) queryParams.append('name', name);
       if (teamNeeds) queryParams.append('team_needs', teamNeeds);
       if (schoolName) queryParams.append('school_name', schoolName);
-      if (position_within_org) queryParams.append('position', position_within_org);
+      if (position_within_org) queryParams.append('position_within_org', position_within_org);
       if (bio) queryParams.append('bio', bio);
 
       const response = await fetch(`http://localhost:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
