@@ -7,8 +7,8 @@
  * @module CreateCoachProfile
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, StyleSheet, Image, Platform, Text, TouchableOpacity, Animated } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, StyleSheet, Image, Platform, Text, TouchableOpacity } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -21,6 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
  */
 const CreateCoachProfileScreen = () => {
   // State management for form data and user identification
+  const [name, setName] = useState('');
   const [userId, setUserId] = useState(null);
   const [teamNeeds, setTeamNeeds] = useState('');
   const [schoolName, setSchoolName] = useState('');
@@ -30,32 +31,13 @@ const CreateCoachProfileScreen = () => {
   const [error, setError] = useState('');
   const [showSplash, setShowSplash] = useState(false);
   const router = useRouter();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  /**
-   * Fetches and decodes user token on component mount
-   * 
-   * @async
-   * @function fetchTokenAndDecode
-   */
   useEffect(() => {
     fetchTokenAndDecode();
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
   }, []);
 
-  /**
-   * Retrieves and decodes JWT token to get user ID
-   * 
-   * @async
-   * @function fetchTokenAndDecode
-   */
   const fetchTokenAndDecode = async () => {
     try {
-      // Fetch user token from backend
       const response = await fetch('http://localhost:8000/scoutbase/user', {
         method: 'GET',
         headers: {
@@ -68,7 +50,6 @@ const CreateCoachProfileScreen = () => {
         throw new Error('Failed to retrieve token');
       }
 
-      // Decode token and extract user ID
       const token = await response.text();
       const decodedToken = jwtDecode(token);
 
@@ -84,14 +65,7 @@ const CreateCoachProfileScreen = () => {
     }
   };
 
-  /**
-   * Handles image selection from device library
-   * 
-   * @async
-   * @function pickImage
-   */
   const pickImage = async () => {
-    // Request permission to access media library
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
@@ -99,7 +73,6 @@ const CreateCoachProfileScreen = () => {
       return;
     }
 
-    // Launch image picker
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -110,7 +83,6 @@ const CreateCoachProfileScreen = () => {
     if (!pickerResult.canceled) {
       let localUri = pickerResult.assets[0].uri;
 
-      // Handle iOS file path format
       if (Platform.OS === 'ios') {
         localUri = localUri.replace('file://', '');
       }
@@ -119,29 +91,20 @@ const CreateCoachProfileScreen = () => {
     }
   };
 
-  /**
-   * Handles the coach profile creation process
-   * Validates form inputs and sends profile data to the backend
-   * 
-   * @async
-   * @function handleCreateProfile
-   */
   const handleCreateProfile = async () => {
-    // Validate required fields
-    if (!userId || !teamNeeds || !schoolName || !position_within_org || !bio) {
+    if (!name || !userId || !teamNeeds || !schoolName || !position_within_org || !bio) {
       setError('Please fill in all required fields');
       return;
     }
 
-    // Prepare form data for profile creation
     const profileData = new FormData();
+    profileData.append('name', name);
     profileData.append('user_id', userId);
     profileData.append('team_needs', teamNeeds);
     profileData.append('school_name', schoolName);
     profileData.append('position_within_org', position_within_org);
     profileData.append('bio', bio);
 
-    // Append profile picture if selected
     if (profilePicture) {
       const filename = profilePicture.split('/').pop();
       const match = /\.(\w+)$/.exec(filename);
@@ -155,7 +118,6 @@ const CreateCoachProfileScreen = () => {
     }
 
     try {
-      // Send profile creation request to backend
       const response = await fetch('http://localhost:8000/scoutbase/coach/createprofile', {
         method: 'POST',
         body: profileData,
@@ -168,9 +130,7 @@ const CreateCoachProfileScreen = () => {
         throw new Error(responseData?.message || 'Failed to create profile');
       }
 
-      // Show splash screen
       setShowSplash(true);
-      // Wait 2 seconds then navigate
       setTimeout(() => {
         router.push('/profile');
       }, 2000);
@@ -180,79 +140,77 @@ const CreateCoachProfileScreen = () => {
     }
   };
 
-  /**
-   * Render the profile creation form interface
-   */
   return (
-    <Animated.View style={{ opacity: fadeAnim }}>
-      <View style={styles.container}>
-        {showSplash ? (
-          <View style={styles.splashContainer}>
-            <Text style={styles.splashText}>Profile Created!</Text>
-            <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
+    <View style={styles.container}>
+      {showSplash ? (
+        <View style={styles.splashContainer}>
+          <Text style={styles.splashText}>Profile Created!</Text>
+          <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
+        </View>
+      ) : (
+        <>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>Create Coach Profile</Text>
+            <Text style={styles.welcomeSubtext}>Tell us about your team</Text>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
-        ) : (
-          <>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Text style={styles.backButtonText}>← Back</Text>
+
+          <View style={styles.formContainer}>
+            <TextInput 
+              style={styles.input} 
+              placeholder="Enter your name how you would like it to be displayed on your account" 
+              value={name} 
+              onChangeText={setName} 
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Team Needs (e.g., Looking for pitchers)"
+              value={teamNeeds}
+              onChangeText={setTeamNeeds}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="School Name"
+              value={schoolName}
+              onChangeText={setSchoolName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Position Within Organization"
+              value={position_within_org}
+              onChangeText={setPositionWithinOrg}
+            />
+            <TextInput
+              style={[styles.input, styles.bioInput]}
+              placeholder="Bio"
+              value={bio}
+              onChangeText={setBio}
+              multiline
+              numberOfLines={4}
+            />
+            
+            {profilePicture && (
+              <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+            )}
+
+            <TouchableOpacity style={styles.button} onPress={pickImage}>
+              <Text style={styles.buttonText}>Select Profile Picture</Text>
             </TouchableOpacity>
-
-            <View style={styles.welcomeContainer}>
-              <Text style={styles.welcomeText}>Create Coach Profile</Text>
-              <Text style={styles.welcomeSubtext}>Tell us about your team</Text>
-              {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            </View>
-
-            <View style={styles.formContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Team Needs (e.g., Looking for pitchers)"
-                value={teamNeeds}
-                onChangeText={setTeamNeeds}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder="School Name"
-                value={schoolName}
-                onChangeText={setSchoolName}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder="Position Within Organization"
-                value={position_within_org}
-                onChangeText={setPositionWithinOrg}
-              />
-
-              <TextInput
-                style={[styles.input, styles.bioInput]}
-                placeholder="Bio"
-                value={bio}
-                onChangeText={setBio}
-                multiline
-                numberOfLines={4}
-              />
-              
-              {profilePicture && (
-                <Image source={{ uri: profilePicture }} style={styles.profileImage} />
-              )}
-
-              <TouchableOpacity style={styles.button} onPress={pickImage}>
-                <Text style={styles.buttonText}>Choose Profile Picture</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.primaryButton} onPress={handleCreateProfile}>
-                <Text style={styles.buttonText}>Create Profile</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-      </View>
-    </Animated.View>
+            
+            <TouchableOpacity style={styles.primaryButton} onPress={handleCreateProfile}>
+              <Text style={styles.buttonText}>Create Profile</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+    </View>
   );
 };
 
@@ -329,21 +287,24 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#495057',
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderRadius: 8,
     alignItems: 'center',
+    marginVertical: 10,
   },
   primaryButton: {
     backgroundColor: '#1f8bde',
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderRadius: 8,
     alignItems: 'center',
+    marginVertical: 1,
   },
   buttonText: {
     fontFamily: 'SupraSans-Regular',
     color: 'white',
     fontSize: 16,
+    textAlign: 'center',
   },
   splashContainer: {
     flex: 1,

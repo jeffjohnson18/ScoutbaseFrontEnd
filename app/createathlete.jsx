@@ -21,6 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
  */
 const CreateAthleteProfileScreen = () => {
   // State management for form data and user identification
+  const [name, setName] = useState('');
   const [userId, setUserId] = useState(null);
   const [highSchoolName, setHighSchoolName] = useState('');
   const [positions, setPositions] = useState('');
@@ -122,12 +123,13 @@ const CreateAthleteProfileScreen = () => {
    * @function handleCreateProfile
    */
   const handleCreateProfile = async () => {
-    if (!userId || !highSchoolName || !positions || !height || !weight || !bio || !state || !throwing_arm || !batting_arm) {
+    if (!name || !userId || !highSchoolName || !positions || !height || !weight || !bio || !state || !throwing_arm || !batting_arm) {
       setError('Please fill in all required fields');
       return;
     }
 
     const profileData = new FormData();
+    profileData.append('name', name);
     profileData.append('user_id', userId);
     profileData.append('high_school_name', highSchoolName);
     profileData.append('positions', positions);
@@ -208,6 +210,12 @@ const CreateAthleteProfileScreen = () => {
           </View>
 
           <View style={styles.formContainer}>
+            <TextInput 
+              style={styles.input} 
+              placeholder="Enter your name how you would like it to be displayed on your account" 
+              value={name} 
+              onChangeText={setName} 
+            />
             <TextInput 
               style={styles.input} 
               placeholder="High School Name" 

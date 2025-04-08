@@ -22,6 +22,7 @@ const EditAthleteProfile = () => {
   // State management for user data and loading status
   const [userId, setUserId] = useState(null);
   const [profileData, setProfileData] = useState({
+    name: '',
     high_school_name: '',
     positions: '',
     youtube_video_link: '',
@@ -60,6 +61,7 @@ const EditAthleteProfile = () => {
         // Populate form with existing data if available
         if (profile.length > 0) {
           setProfileData({
+            name: profile[0]?.name || '',
             high_school_name: profile[0]?.high_school_name || '',
             positions: profile[0]?.positions || '',
             youtube_video_link: profile[0]?.youtube_video_link || '',
@@ -93,6 +95,7 @@ const EditAthleteProfile = () => {
     try {
       // Prepare request body with updated profile data
       const requestBody = {
+        name: profileData.name || null,
         high_school_name: profileData.high_school_name || null,
         positions: profileData.positions || null,
         youtube_video_link: profileData.youtube_video_link || null,
@@ -146,6 +149,12 @@ const EditAthleteProfile = () => {
         </View>
 
         <View style={styles.formContainer}>
+          <TextInput 
+            style={styles.input} 
+            placeholder="Name"
+            value={profileData.name}
+            onChangeText={(text) => setProfileData({ ...profileData, name: text })}
+          />
           <TextInput 
             style={styles.input} 
             placeholder="High School Name"

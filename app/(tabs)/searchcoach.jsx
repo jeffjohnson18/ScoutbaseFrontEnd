@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the message box icon
 
 /**
@@ -22,6 +22,7 @@ const SearchCoachScreen = () => {
   const [schoolName, setSchoolName] = useState('');
   const [position_within_org, setPosition] = useState('');
   const [bio, setBio] = useState('');
+  const [name, setName] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(true);
@@ -88,6 +89,7 @@ const SearchCoachScreen = () => {
     setIsLoading(true);
     try {
       const queryParams = new URLSearchParams();
+      if (name) queryParams.append('name', name);
       if (teamNeeds) queryParams.append('team_needs', teamNeeds);
       if (schoolName) queryParams.append('school_name', schoolName);
       if (position_within_org) queryParams.append('position', position_within_org);
@@ -138,36 +140,6 @@ const SearchCoachScreen = () => {
   };
 
   /**
-   * Renders individual coach profile cards in the results list.
-   * 
-   * @function renderItem
-   * @param {Object} item - Coach profile data to display
-   */
-  const renderItem = ({ item }) => (
-    <View style={styles.resultCard}>
-      <View style={styles.profileContainer}>
-        {item.profile_picture && item.profile_picture.startsWith('http') ? (
-          <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
-        ) : (
-          <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
-        )}
-        {/* Coach profile details */}
-        <View>
-          <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
-          <Text style={styles.resultText}>School Name: {item.school_name}</Text>
-          <Text style={styles.resultText}>Position Within Org: {item.position_within_org}</Text>
-          <Text style={styles.resultText}>Bio: {item.bio}</Text>
-          <TouchableOpacity 
-            onPress={() => fetchEmailForProfile(item.user_id)}
-          >
-            <Text style={styles.emailText}>View Email</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-
-  /**
    * Render the search interface and results.
    */
   return (
@@ -209,6 +181,12 @@ const SearchCoachScreen = () => {
         >
           <TextInput
             style={styles.input}
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.input}
             placeholder="Team Needs"
             value={teamNeeds}
             onChangeText={setTeamNeeds}
@@ -243,20 +221,42 @@ const SearchCoachScreen = () => {
         </Animated.View>
       )}
 
-      <Animated.View style={{ opacity: resultsFadeAnim }}>
-        <FlatList
-          data={results}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={styles.resultsContainer}
-          ListEmptyComponent={
+      <Animated.View style={{ opacity: resultsFadeAnim, flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.resultsContainer}>
+          {results.length > 0 ? (
+            results.map((item, index) => (
+              <View key={index.toString()} style={styles.resultCard}>
+                <ScrollView horizontal={true} showsHorizontalScrollIndicator={true}>
+                  <View style={styles.profileContainer}>
+                    {item.profile_picture && item.profile_picture.startsWith('http') ? (
+                      <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
+                    ) : (
+                      <Text style={styles.profilePicture}>{item.profile_picture || '👤'}</Text>
+                    )}
+                    <View>
+                      <Text style={styles.resultText}>Name: {item.name}</Text>
+                      <Text style={styles.resultText}>Team Needs: {item.team_needs}</Text>
+                      <Text style={styles.resultText}>School Name: {item.school_name}</Text>
+                      <Text style={styles.resultText}>Position Within Org: {item.position_within_org}</Text>
+                      <Text style={styles.resultText}>Bio: {item.bio}</Text>
+                      <TouchableOpacity 
+                        onPress={() => fetchEmailForProfile(item.user_id)}
+                      >
+                        <Text style={styles.emailText}>View Email</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </ScrollView>
+              </View>
+            ))
+          ) : (
             !isLoading && (
               <Text style={styles.noResults}>
                 No coaches found matching the criteria
               </Text>
             )
-          }
-        />
+          )}
+        </ScrollView>
       </Animated.View>
 
       {/* Confirmation Modal */}

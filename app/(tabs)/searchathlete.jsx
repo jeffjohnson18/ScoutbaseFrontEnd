@@ -32,6 +32,7 @@ const SearchAthleteScreen = () => {
   const [selectedEmail, setSelectedEmail] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
   const [state, setState] = useState('');
+  const [name, setName] = useState('');
 
   // Animation values for UI transitions
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -92,6 +93,7 @@ const SearchAthleteScreen = () => {
     setIsLoading(true);
     try {
       const queryParams = new URLSearchParams();
+      if (name) queryParams.append('name', name);
       if (highSchool) queryParams.append('high_school_name', highSchool);
       if (positions) queryParams.append('positions', positions);
       if (bio) queryParams.append('bio', bio);
@@ -183,6 +185,12 @@ const SearchAthleteScreen = () => {
         >
           <TextInput
             style={styles.input}
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.input}
             placeholder="High School"
             value={highSchool}
             onChangeText={setHighSchool}
@@ -256,9 +264,10 @@ const SearchAthleteScreen = () => {
                       <Text style={styles.profilePicture}>{item.profile_picture || '⚾'}</Text>
                     )}
                     <View>
+                      <Text style={styles.resultText}>{item.name}</Text>
                       <Text style={styles.resultText}>{item.high_school_name}</Text>
                       <Text style={styles.resultText}>{item.positions}</Text>
-                      <Text style={styles.resultText}>{item.height} feet/inches</Text>
+                      <Text style={styles.resultText}>{item.height} feet</Text>
                       <Text style={styles.resultText}>{item.weight} lbs</Text>
                       <Text style={styles.resultText}>{item.state}</Text>
                       <Text style={styles.resultText}>{item.bio}</Text>
@@ -378,7 +387,7 @@ const styles = StyleSheet.create({
   },
   profileImage: {
     width: 60,
-    height: '90%',
+    height: '95%',
     borderRadius: 10,
     marginRight: 16,
   },

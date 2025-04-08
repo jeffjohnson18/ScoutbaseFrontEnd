@@ -22,6 +22,7 @@ const EditCoachProfile = () => {
   // State management for user data and loading status
   const [userId, setUserId] = useState(null);
   const [profileData, setProfileData] = useState({
+    name: '',
     team_needs: '',
     school_name: '',
     position_within_org: '',
@@ -55,6 +56,7 @@ const EditCoachProfile = () => {
         // Populate form with existing data if available
         if (profile.length > 0) {
           setProfileData({
+            name: profile[0]?.name || '',
             team_needs: profile[0]?.team_needs || '',
             school_name: profile[0]?.school_name || '',
             position_within_org: profile[0]?.position_within_org || '',
@@ -82,6 +84,7 @@ const EditCoachProfile = () => {
     try {
       // Prepare request body with updated profile data
       const requestBody = {
+        name: profileData.name || null,
         team_needs: profileData.team_needs || null,
         school_name: profileData.school_name || null,
         position_within_org: profileData.position_within_org || null,
@@ -128,6 +131,12 @@ const EditCoachProfile = () => {
         </View>
 
         <View style={styles.formContainer}>
+          <TextInput 
+            style={styles.input} 
+            placeholder="Name"
+            value={profileData.name}
+            onChangeText={(text) => setProfileData({ ...profileData, name: text })}
+          />
           <TextInput
             style={styles.input}
             placeholder="Team Needs"
