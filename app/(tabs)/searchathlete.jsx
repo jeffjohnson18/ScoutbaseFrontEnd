@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the message box icon
 
 /**
@@ -145,41 +145,6 @@ const SearchAthleteScreen = () => {
   };
 
   /**
-   * Renders individual athlete profile cards in the results list.
-   * 
-   * @function renderItem
-   * @param {Object} item - Athlete profile data to display
-   */
-  const renderItem = ({ item }) => (
-    <View style={styles.resultCard}>
-      <View style={styles.profileContainer}>
-        {/* Profile picture display - shows image or default icon */}
-        {item.profile_picture && item.profile_picture.startsWith('http') ? (
-          <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
-        ) : (
-          <Text style={styles.profilePicture}>{item.profile_picture || '⚾'}</Text>
-        )}
-        {/* Athlete profile details */}
-        <View>
-          <Text style={styles.resultText}>{item.high_school_name}</Text>
-          <Text style={styles.resultText}>{item.positions}</Text>
-          <Text style={styles.resultText}>{item.height} feet/inches</Text>
-          <Text style={styles.resultText}>{item.weight} lbs</Text>
-          <Text style={styles.resultText}>{item.state}</Text>
-          <Text style={styles.resultText}>{item.bio}</Text>
-          <Text style={styles.resultText}>Throwing Arm: {item.throwing_arm}</Text>
-          <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
-          <TouchableOpacity 
-            onPress={() => fetchEmailForProfile(item.user_id)} // Directly fetch email on press
-          >
-            <Text style={styles.emailText}>View Email</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-
-  /**
    * Render the search interface and results.
    */
   return (
@@ -278,20 +243,45 @@ const SearchAthleteScreen = () => {
         </Animated.View>
       )}
 
-      <Animated.View style={{ opacity: resultsFadeAnim }}>
-        <FlatList
-          data={results}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={styles.resultsContainer}
-          ListEmptyComponent={
+      <Animated.View style={{ opacity: resultsFadeAnim, flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.resultsContainer}>
+          {results.length > 0 ? (
+            results.map((item, index) => (
+              <View key={index.toString()} style={styles.resultCard}>
+                <ScrollView horizontal={true} showsHorizontalScrollIndicator={true}>
+                  <View style={styles.profileContainer}>
+                    {item.profile_picture && item.profile_picture.startsWith('http') ? (
+                      <Image source={{ uri: item.profile_picture }} style={styles.profileImage} />
+                    ) : (
+                      <Text style={styles.profilePicture}>{item.profile_picture || '⚾'}</Text>
+                    )}
+                    <View>
+                      <Text style={styles.resultText}>{item.high_school_name}</Text>
+                      <Text style={styles.resultText}>{item.positions}</Text>
+                      <Text style={styles.resultText}>{item.height} feet/inches</Text>
+                      <Text style={styles.resultText}>{item.weight} lbs</Text>
+                      <Text style={styles.resultText}>{item.state}</Text>
+                      <Text style={styles.resultText}>{item.bio}</Text>
+                      <Text style={styles.resultText}>Throwing Arm: {item.throwing_arm}</Text>
+                      <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
+                      <TouchableOpacity 
+                        onPress={() => fetchEmailForProfile(item.user_id)}
+                      >
+                        <Text style={styles.emailText}>View Email</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </ScrollView>
+              </View>
+            ))
+          ) : (
             !isLoading && (
               <Text style={styles.noResults}>
                 No athletes found matching the criteria
               </Text>
             )
-          }
-        />
+          )}
+        </ScrollView>
       </Animated.View>
 
       {/* Confirmation Modal */}
