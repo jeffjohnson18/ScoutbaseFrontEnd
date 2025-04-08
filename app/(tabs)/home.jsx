@@ -7,6 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Animated } from 'react-native';
 import { useFonts } from 'expo-font';
+import { useRouter } from 'expo-router';
 
 /**
  * Featured articles data
@@ -120,113 +121,39 @@ const ArticleCard = ({ title, description }) => {
  * Displays welcome message and featured articles for users
  * @component
  */
-const HomePage = ({ navigation }) => {
+const HomePage = () => {
+  const router = useRouter();
   const [fontsLoaded] = useFonts({
     'SupraSans-Regular': require('../../assets/fonts/HvDTrial_SupriaSans-Regular-BF64868e7702378.otf'),
     'SupraSans-HeavyOblique': require('../../assets/fonts/HvDTrial_SupriaSans-HeavyOblique-BF64868e75ae1fa.otf'),
   });
 
-  // Add animation values
-  const fadeAnim = React.useRef(new Animated.Value(0)).current;
-  const slideAnim = React.useRef(new Animated.Value(50)).current;
-  const featuredFadeAnim = React.useRef(new Animated.Value(0)).current;
-  const featuredSlideAnim = React.useRef(new Animated.Value(30)).current;
-  const eventsFadeAnim = React.useRef(new Animated.Value(0)).current;
-  const eventsSlideAnim = React.useRef(new Animated.Value(50)).current;
-
-  // Add animation sequence
-  useEffect(() => {
-    Animated.sequence([
-      // Welcome text animation
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ]),
-      // Featured articles animation
-      Animated.parallel([
-        Animated.timing(featuredFadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(featuredSlideAnim, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]),
-      // Events animation
-      Animated.parallel([
-        Animated.timing(eventsFadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(eventsSlideAnim, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start();
-  }, []);
-
-  /**
-   * Render the home screen interface
-   */
   return (
     <ScrollView style={styles.container}>
-      <Animated.View 
-        style={[
-          styles.welcomeContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-          }
-        ]}
-      >
+      <View style={styles.welcomeContainer}>
         <Text style={styles.welcomeText}>Welcome!</Text>
         <Text style={styles.welcomeSubtext}>Here's what's new on Scoutbase</Text>
-      </Animated.View>
+      </View>
 
-      {/* Featured Articles */}
-      <Animated.View 
-        style={[
-          styles.sectionContainer,
-          {
-            opacity: featuredFadeAnim,
-            transform: [{ translateY: featuredSlideAnim }],
-          }
-        ]}
-      >
-        <Text style={styles.sectionTitle}>Featured Articles</Text>
-        {articles.map((article) => (
-          <ArticleCard
-            key={article.id}
-            title={article.title}
-            description={article.description}
-          />
-        ))}
-      </Animated.View>
+      {/* Buttons for searching */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity 
+          style={[styles.button, styles.searchCoachButton]} 
+          onPress={() => router.push('/searchcoach')}
+        >
+          <Text style={styles.buttonText}>Search for a Coach</Text>
+        </TouchableOpacity>
 
-      {/* Arizona Events */}
-      <Animated.View 
-        style={[
-          styles.sectionContainer,
-          {
-            opacity: eventsFadeAnim,
-            transform: [{ translateY: eventsSlideAnim }],
-          }
-        ]}
-      >
+        <TouchableOpacity 
+          style={[styles.button, styles.searchAthleteButton]} 
+          onPress={() => router.push('/searchathlete')}
+        >
+          <Text style={styles.buttonText}>Search for an Athlete</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Arizona Events Section */}
+      <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Events in Arizona</Text>
         {arizonaEvents.map((event) => (
           <ArticleCard
@@ -235,7 +162,7 @@ const HomePage = ({ navigation }) => {
             description={event.description}
           />
         ))}
-      </Animated.View>
+      </View>
     </ScrollView>
   );
 };
@@ -267,13 +194,45 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
+  buttonContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  button: {
+    width: '90%',
+    paddingVertical: 16,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginVertical: 5,
+  },
+  searchCoachButton: {
+    backgroundColor: '#e63946',
+  },
+  searchAthleteButton: {
+    backgroundColor: '#1f8bde',
+  },
+  buttonText: {
+    fontFamily: 'SupraSans-Regular',
+    color: 'white',
+    fontSize: 16,
+  },
+  sectionContainer: {
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontFamily: 'SupraSans-Regular',
+    fontSize: 20,
+    color: '#666',
+    marginBottom: 16,
+    marginLeft: 16,
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 4,
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 12,
-    // Card shadow styling
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -298,23 +257,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 8,
     lineHeight: 20,
-    paddingHorizontal: 4, // Added horizontal padding
+    paddingHorizontal: 4,
   },
   dropdownArrow: {
     fontSize: 12,
     color: '#1f8bde',
     marginLeft: 8,
-  },
-  sectionContainer: {
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontFamily: 'SupraSans-Regular', // Changed from HeavyOblique to Regular
-    fontSize: 20, // Slightly reduced from 24
-    color: '#666', // Changed to match other secondary text
-    marginBottom: 16,
-    marginLeft: 16,
   },
 });
 

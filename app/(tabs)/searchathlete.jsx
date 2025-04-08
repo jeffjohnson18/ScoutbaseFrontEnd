@@ -273,6 +273,12 @@ const SearchAthleteScreen = () => {
                       <Text style={styles.resultText}>{item.bio}</Text>
                       <Text style={styles.resultText}>Throwing Arm: {item.throwing_arm}</Text>
                       <Text style={styles.resultText}>Batting Arm: {item.batting_arm}</Text>
+                      {/* Display YouTube video link if it exists */}
+                      {item.youtube_video_link ? (
+                        <Text style={styles.resultText}>YouTube Video: {item.youtube_video_link}</Text>
+                      ) : (
+                        <Text style={styles.resultText}></Text>
+                      )}
                       <TouchableOpacity 
                         onPress={() => fetchEmailForProfile(item.user_id)}
                       >
