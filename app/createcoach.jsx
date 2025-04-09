@@ -158,7 +158,7 @@ const CreateCoachProfileScreen = () => {
 
           <View style={styles.welcomeContainer}>
             <Text style={styles.welcomeText}>Create Coach Profile</Text>
-            <Text style={styles.welcomeSubtext}>Tell us about your team</Text>
+            <Text style={styles.welcomeSubtext}>Tell us about your team needs</Text>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
 
@@ -171,13 +171,13 @@ const CreateCoachProfileScreen = () => {
             />
             <TextInput
               style={styles.input}
-              placeholder="Team Needs (e.g., Looking for pitchers)"
+              placeholder="Team Needs (e.g., Looking for pitchers, home run hitters)"
               value={teamNeeds}
               onChangeText={setTeamNeeds}
             />
             <TextInput
               style={styles.input}
-              placeholder="School Name"
+              placeholder="School/Organization Name"
               value={schoolName}
               onChangeText={setSchoolName}
             />

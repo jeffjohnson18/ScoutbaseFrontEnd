@@ -225,7 +225,7 @@ const CreateAthleteProfileScreen = () => {
 
             <TextInput 
               style={styles.input} 
-              placeholder="Positions (e.g., Pitcher, Outfielder)" 
+              placeholder="Positions (e.g., Pitcher, First base). Be as specific as you'd like!" 
               value={positions} 
               onChangeText={setPositions} 
             />
@@ -263,7 +263,7 @@ const CreateAthleteProfileScreen = () => {
 
             <TextInput 
               style={styles.input} 
-              placeholder="State" 
+              placeholder="Preferred State(s)" 
               value={state} 
               onChangeText={setState} 
             />
