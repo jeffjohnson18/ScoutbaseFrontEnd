@@ -101,7 +101,7 @@ const SearchAthleteScreen = () => {
       if (weight) queryParams.append('weight', weight);
       if (state) queryParams.append('state', state);
       if (throwing_arm) queryParams.append('throwing_arm', throwing_arm);
-      if (batting_arm) queryParams.append('battingß_arm', batting_arm);
+      if (batting_arm) queryParams.append('batting_arm', batting_arm);
 
       const response = await fetch(`http://localhost:8000/scoutbase/searchforathlete?${queryParams.toString()}`, {
         method: 'GET',
@@ -168,7 +168,7 @@ const SearchAthleteScreen = () => {
           textAlign: 'center',
           paddingHorizontal: 20,
         }]}>
-          Connect with managers, coaches, and staff that meet your criteria.
+          Connect with athletes that meet your criteria.
         </Text>
       </Animated.View>
 
