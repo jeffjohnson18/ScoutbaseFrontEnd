@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, StyleSheet, Alert, Image, Animated, TouchableOpacity, Modal, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the message box icon
+import * as ImagePicker from 'expo-image-picker';
 
 /**
  * SearchCoachScreen Component
@@ -22,6 +23,8 @@ const SearchCoachScreen = () => {
   const [schoolName, setSchoolName] = useState('');
   const [position_within_org, setPosition] = useState('');
   const [bio, setBio] = useState('');
+  const [division, setDivision] = useState('');
+  const [state, setState] = useState('');
   const [name, setName] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,6 +97,8 @@ const SearchCoachScreen = () => {
       if (schoolName) queryParams.append('school_name', schoolName);
       if (position_within_org) queryParams.append('position_within_org', position_within_org);
       if (bio) queryParams.append('bio', bio);
+      if (division) queryParams.append('division', division);
+      if (state) queryParams.append('state', state);
 
       const response = await fetch(`http://localhost:8000/scoutbase/searchforcoach?${queryParams.toString()}`, {
         method: 'GET',
@@ -136,6 +141,54 @@ const SearchCoachScreen = () => {
       setModalVisible(true); // Show the modal with the email
     } catch (error) {
       Alert.alert('Error', `Could not fetch email: ${error.message}`);
+    }
+  };
+
+  const handleImagePicker = async () => {
+    // Request permission to access the media library
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    // Launch the image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setProfileData({ ...profileData, profile_picture: uri });
+      // Optionally, upload the image to the server here
+      await uploadProfilePicture(uri);
+    }
+  };
+
+  const uploadProfilePicture = async (uri) => {
+    const formData = new FormData();
+    formData.append('profile_picture', {
+      uri,
+      type: 'image/jpeg', // or the appropriate type
+      name: 'profile_picture.jpg',
+    });
+
+    try {
+      const response = await fetch(`http://localhost:8000/scoutbase/upload-profile-picture/${userId}/`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload profile picture');
+      }
+
+      Alert.alert('Success', 'Profile picture updated successfully.');
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to upload profile picture.');
     }
   };
 
@@ -203,11 +256,24 @@ const SearchCoachScreen = () => {
             value={position_within_org}
             onChangeText={setPosition}
           />
+          
           <TextInput
             style={styles.input}
             placeholder="Bio"
             value={bio}
             onChangeText={setBio}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Division (e.g., Varsity, Junior Varsity)"
+            value={division}
+            onChangeText={setDivision}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="State (e.g., CA, NY)"
+            value={state}
+            onChangeText={setState}
           />
           <TouchableOpacity 
             style={styles.primaryButton}
@@ -239,6 +305,8 @@ const SearchCoachScreen = () => {
                       <Text style={styles.resultText}>School Name: {item.school_name}</Text>
                       <Text style={styles.resultText}>Position Within Org: {item.position_within_org}</Text>
                       <Text style={styles.resultText}>Bio: {item.bio}</Text>
+                      <Text style={styles.resultText}>Division: {item.division}</Text>
+                      <Text style={styles.resultText}>State: {item.state}</Text>
                       <TouchableOpacity 
                         onPress={() => fetchEmailForProfile(item.user_id)}
                       >

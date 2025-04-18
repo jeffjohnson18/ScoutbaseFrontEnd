@@ -8,9 +8,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Alert, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 
 /**
  * EditCoachProfile Component
@@ -27,6 +28,9 @@ const EditCoachProfile = () => {
     school_name: '',
     position_within_org: '',
     bio: '',
+    profile_picture: '',
+    division: '',
+    state: '',
   });
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -61,6 +65,9 @@ const EditCoachProfile = () => {
             school_name: profile[0]?.school_name || '',
             position_within_org: profile[0]?.position_within_org || '',
             bio: profile[0]?.bio || '',
+            profile_picture: profile[0]?.profile_picture || '',
+            division: profile[0]?.division || '',
+            state: profile[0]?.state || '',
           });
         }
       } catch (error) {
@@ -89,6 +96,8 @@ const EditCoachProfile = () => {
         school_name: profileData.school_name || null,
         position_within_org: profileData.position_within_org || null,
         bio: profileData.bio || null,
+        division: profileData.division || null,
+        state: profileData.state || null,
       };
 
       // Send update request to backend
@@ -107,6 +116,51 @@ const EditCoachProfile = () => {
       router.push('/profile');
     } catch (error) {
       Alert.alert('Error', error.message || 'Failed to update profile.');
+    }
+  };
+
+  const handleImagePicker = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setProfileData({ ...profileData, profile_picture: uri });
+      await uploadProfilePicture(uri);
+    }
+  };
+
+  const uploadProfilePicture = async (uri) => {
+    const formData = new FormData();
+    formData.append('profile_picture', {
+      uri,
+      type: 'image/jpeg',
+      name: 'profile_picture.jpg',
+    });
+
+    try {
+      const response = await fetch(`http://localhost:8000/scoutbase/edit-coach-profile-picture/${userId}/`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload profile picture');
+      }
+
+      Alert.alert('Success', 'Profile picture updated successfully.');
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to upload profile picture.');
     }
   };
 
@@ -129,6 +183,13 @@ const EditCoachProfile = () => {
           <Text style={styles.welcomeText}>Edit Profile</Text>
           <Text style={styles.welcomeSubtext}>Update Your Information</Text>
         </View>
+
+        <TouchableOpacity onPress={handleImagePicker}>
+          <Text style={styles.changePictureText}>Change Profile Picture</Text>
+        </TouchableOpacity>
+        {profileData.profile_picture ? (
+          <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+        ) : null}
 
         <View style={styles.formContainer}>
           <TextInput 
@@ -161,6 +222,18 @@ const EditCoachProfile = () => {
             multiline
             value={profileData.bio}
             onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Division (e.g., Varsity, Junior Varsity)"
+            value={profileData.division}
+            onChangeText={(text) => setProfileData({ ...profileData, division: text })}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="State (e.g., CA, NY)"
+            value={profileData.state}
+            onChangeText={(text) => setProfileData({ ...profileData, state: text })}
           />
 
           <View style={styles.buttonContainer}>
@@ -261,6 +334,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 20,
+  },
+  changePictureText: {
+    color: '#1f8bde',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 

@@ -27,6 +27,8 @@ const CreateCoachProfileScreen = () => {
   const [schoolName, setSchoolName] = useState('');
   const [position_within_org, setPositionWithinOrg] = useState('');
   const [bio, setBio] = useState('');
+  const [division, setDivision] = useState('');
+  const [state, setState] = useState('');
   const [profilePicture, setProfilePicture] = useState(null);
   const [error, setError] = useState('');
   const [showSplash, setShowSplash] = useState(false);
@@ -92,7 +94,7 @@ const CreateCoachProfileScreen = () => {
   };
 
   const handleCreateProfile = async () => {
-    if (!name || !userId || !teamNeeds || !schoolName || !position_within_org || !bio) {
+    if (!name || !userId || !teamNeeds || !schoolName || !position_within_org || !bio || !division || !state) {
       setError('Please fill in all required fields');
       return;
     }
@@ -104,6 +106,8 @@ const CreateCoachProfileScreen = () => {
     profileData.append('school_name', schoolName);
     profileData.append('position_within_org', position_within_org);
     profileData.append('bio', bio);
+    profileData.append('division', division);
+    profileData.append('state', state);
 
     if (profilePicture) {
       const filename = profilePicture.split('/').pop();
@@ -194,6 +198,18 @@ const CreateCoachProfileScreen = () => {
               onChangeText={setBio}
               multiline
               numberOfLines={4}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Division (e.g., Varsity, Junior Varsity)"
+              value={division}
+              onChangeText={setDivision}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="State (e.g., CA, NY)"
+              value={state}
+              onChangeText={setState}
             />
             
             {profilePicture && (

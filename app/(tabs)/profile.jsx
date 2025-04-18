@@ -247,8 +247,6 @@ const ProfileScreen = () => {
                 <Text style={styles.infoLabel}>School Name</Text>
                 <Text style={styles.infoText}>{profileData.school_name}</Text>
                 
-                <Text style={styles.infoLabel}>State</Text>
-                <Text style={styles.infoText}>{profileData.state}</Text>
                 
                 <Text style={styles.infoLabel}>Bio</Text>
                 <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>

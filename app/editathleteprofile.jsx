@@ -8,9 +8,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, Alert, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, TextInput, Button, Alert, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 
 /**
  * EditAthleteProfile Component
@@ -127,7 +128,52 @@ const EditAthleteProfile = () => {
       Alert.alert("Error", error.message || "Failed to update profile.");
     }
   };
-  
+
+  const handleImagePicker = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setProfileData({ ...profileData, profile_picture: uri });
+      await uploadProfilePicture(uri);
+    }
+  };
+
+  const uploadProfilePicture = async (uri) => {
+    const formData = new FormData();
+    formData.append('profile_picture', {
+      uri,
+      type: 'image/jpeg',
+      name: 'profile_picture.jpg',
+    });
+
+    try {
+      const response = await fetch(`http://localhost:8000/scoutbase/edit-athlete-profile-picture/${userId}/`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload profile picture');
+      }
+
+      Alert.alert('Success', 'Profile picture updated successfully.');
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to upload profile picture.');
+    }
+  };
+
   // Display loading spinner while data is being fetched
   if (isLoading) {
     return <ActivityIndicator size="large" color="#1e90ff" style={styles.loader} />;
@@ -148,6 +194,13 @@ const EditAthleteProfile = () => {
           <Text style={styles.welcomeSubtext}>Update Your Information</Text>
         </View>
 
+        <TouchableOpacity onPress={handleImagePicker}>
+          <Text style={styles.changePictureText}>Change Profile Picture</Text>
+        </TouchableOpacity>
+        {profileData.profile_picture ? (
+          <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+        ) : null}
+
         <View style={styles.formContainer}>
           <TextInput 
             style={styles.input} 
@@ -161,21 +214,18 @@ const EditAthleteProfile = () => {
             value={profileData.high_school_name}
             onChangeText={(text) => setProfileData({ ...profileData, high_school_name: text })}
           />
-
           <TextInput 
             style={styles.input} 
             placeholder="Positions"
             value={profileData.positions}
             onChangeText={(text) => setProfileData({ ...profileData, positions: text })}
           />
-
           <TextInput 
             style={styles.input} 
             placeholder="YouTube Video Link"
             value={profileData.youtube_video_link}
             onChangeText={(text) => setProfileData({ ...profileData, youtube_video_link: text })}
           />
-
           <TextInput 
             style={styles.input} 
             placeholder="Height (ft)"
@@ -183,7 +233,6 @@ const EditAthleteProfile = () => {
             value={profileData.height}
             onChangeText={(text) => setProfileData({ ...profileData, height: text })}
           />
-
           <TextInput 
             style={styles.input} 
             placeholder="Weight (lbs)"
@@ -191,7 +240,6 @@ const EditAthleteProfile = () => {
             value={profileData.weight}
             onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
           />
-
           <TextInput 
             style={styles.input} 
             placeholder="Bio"
@@ -199,27 +247,24 @@ const EditAthleteProfile = () => {
             value={profileData.bio}
             onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
           />
-
           <TextInput 
-              style={styles.input} 
-              placeholder="State"
-              value={profileData.state}
-              onChangeText={(text) => setProfileData({ ...profileData, state: text })}
-            />
-
-            <TextInput 
-              style={styles.input} 
-              placeholder="Throwing Arm"
-              value={profileData.throwing_arm}
-              onChangeText={(text) => setProfileData({ ...profileData, throwing_arm: text })}
-            />
-
-            <TextInput 
-              style={styles.input} 
-              placeholder="Batting Arm"
-              value={profileData.batting_arm}
-              onChangeText={(text) => setProfileData({ ...profileData, batting_arm: text })}
-            />
+            style={styles.input} 
+            placeholder="State"
+            value={profileData.state}
+            onChangeText={(text) => setProfileData({ ...profileData, state: text })}
+          />
+          <TextInput 
+            style={styles.input} 
+            placeholder="Throwing Arm"
+            value={profileData.throwing_arm}
+            onChangeText={(text) => setProfileData({ ...profileData, throwing_arm: text })}
+          />
+          <TextInput 
+            style={styles.input} 
+            placeholder="Batting Arm"
+            value={profileData.batting_arm}
+            onChangeText={(text) => setProfileData({ ...profileData, batting_arm: text })}
+          />
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
@@ -319,6 +364,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 20,
+  },
+  changePictureText: {
+    color: '#1f8bde',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 
