@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, StyleSheet, Image, Platform, Text, TouchableOpacity } from 'react-native';
+import { View, TextInput, StyleSheet, Image, Platform, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -152,7 +152,7 @@ const CreateCoachProfileScreen = () => {
           <Text style={styles.splashSubtext}>Redirecting to your profile...</Text>
         </View>
       ) : (
-        <>
+        <ScrollView>
           <TouchableOpacity 
             style={styles.backButton}
             onPress={() => router.back()}
@@ -224,7 +224,7 @@ const CreateCoachProfileScreen = () => {
               <Text style={styles.buttonText}>Create Profile</Text>
             </TouchableOpacity>
           </View>
-        </>
+        </ScrollView>
       )}
     </View>
   );

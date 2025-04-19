@@ -196,8 +196,6 @@ const ProfileScreen = () => {
           >
             {role === 'Scout' ? (
               <Text style={styles.infoText} onPress={handleLogout} >You selected a scout profile, so you have no public-facing account. Logout here</Text>
-              
-
             ) : (
               profileData.profile_picture && profileData.profile_picture.startsWith('http') ? (
                 <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
@@ -246,7 +244,6 @@ const ProfileScreen = () => {
                 
                 <Text style={styles.infoLabel}>School Name</Text>
                 <Text style={styles.infoText}>{profileData.school_name}</Text>
-                
                 
                 <Text style={styles.infoLabel}>Bio</Text>
                 <Text style={styles.infoText}>{profileData.bio || 'N/A'}</Text>

@@ -188,7 +188,9 @@ const EditCoachProfile = () => {
           <Text style={styles.changePictureText}>Change Profile Picture</Text>
         </TouchableOpacity>
         {profileData.profile_picture ? (
-          <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: profileData.profile_picture }} style={styles.profileImage} />
+          </View>
         ) : null}
 
         <View style={styles.formContainer}>
@@ -339,6 +341,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+  },
+  imageContainer: {
+    alignItems: 'center',
     marginBottom: 20,
   },
   changePictureText: {
